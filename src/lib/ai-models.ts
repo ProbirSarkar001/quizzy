@@ -1,18 +1,7 @@
-import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
-export const zai = createOpenAICompatible({
-  name: "zai",
-  apiKey: process.env.ZAI_API_KEY,
-  baseURL: "https://api.z.ai/api/paas/v4/"
-});
+import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 
-const openai = createOpenAICompatible({
-  baseURL: process.env.OPENAI_BASE_URL || "",
-  apiKey: process.env.OPENAI_API_KEY || "",
-  name: "openai",
-  headers: {
-    Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
-  },
-  supportsStructuredOutputs: true
-});
+const openrouter = createOpenRouter({ apiKey: process.env.OPENROUTER_API_KEY || "" });
 
-export const model = openai(process.env.OPENAI_MODEL || "");
+export const model = openrouter(process.env.OPENROUTER_MODEL || "", {
+  models: [...(process.env.OPENROUTER_EXTRA_MODELS?.split(",") || [])]
+});
