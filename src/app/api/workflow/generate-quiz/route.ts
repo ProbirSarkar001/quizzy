@@ -36,66 +36,74 @@ export const { POST } = serve(
 
     // STEP 1: Generate quiz JSON
     const quizDoc = await context.run("generate-quiz-json", async () => {
-      const result = await generateText({
-        model,
-        output: Output.object({
-          schema: QuizDoc
-        }),
-        system: `Strict JSON only. No markdown. No extra commentary.`,
-        prompt: generateQuizPrompt({
-          categoryName: category.name,
-          subCategoryName: subCategory.name,
-          difficulty,
-          count,
-          today,
-          nonce,
-          existingTitles
-        })
-      });
-      return result.output;
+      try {
+        const result = await generateText({
+          model,
+          output: Output.object({
+            schema: QuizDoc
+          }),
+          system: `Strict JSON only. No markdown. No extra commentary.`,
+          prompt: generateQuizPrompt({
+            categoryName: category.name,
+            subCategoryName: subCategory.name,
+            difficulty,
+            count,
+            today,
+            nonce,
+            existingTitles
+          })
+        });
+        return result.output;
+      } catch (error) {
+        throw new WorkflowNonRetryableError("AI generation failed: invalid quiz schema");
+      }
     });
 
     // STEP 2: Save quiz to database
     const savedQuiz = await context.run("save-quiz-db", async () => {
-      return prisma.quiz.create({
-        data: {
-          quizPageTitle: quizDoc.quizPageTitle,
-          quizPageDescription: quizDoc.quizPageDescription,
-          categoryId: category.id,
-          subCategoryId: subCategory.id,
-          tags: {
-            create: quizDoc.tags.map((name) => ({
-              tag: {
-                connectOrCreate: {
-                  where: { name },
-                  create: { name }
+      try {
+        return prisma.quiz.create({
+          data: {
+            quizPageTitle: quizDoc.quizPageTitle,
+            quizPageDescription: quizDoc.quizPageDescription,
+            categoryId: category.id,
+            subCategoryId: subCategory.id,
+            tags: {
+              create: quizDoc.tags.map((name) => ({
+                tag: {
+                  connectOrCreate: {
+                    where: { name },
+                    create: { name }
+                  }
                 }
-              }
-            }))
+              }))
+            },
+            difficulty: quizDoc.difficulty,
+            title: quizDoc.title,
+            description: quizDoc.description,
+            slug: kebabCase(quizDoc.quizPageTitle),
+            isPublished: false,
+            questions: {
+              create: quizDoc.questions.map((q) => ({
+                text: q.prompt,
+                options: q.options,
+                correctIndex: q.correctIndex,
+                explanation: q.explanation ?? null
+              }))
+            }
           },
-          difficulty: quizDoc.difficulty,
-          title: quizDoc.title,
-          description: quizDoc.description,
-          slug: kebabCase(quizDoc.quizPageTitle),
-          isPublished: false,
-          questions: {
-            create: quizDoc.questions.map((q) => ({
-              text: q.prompt,
-              options: q.options,
-              correctIndex: q.correctIndex,
-              explanation: q.explanation ?? null
-            }))
-          }
-        },
-        include: { questions: true }
-      });
+          include: { questions: true }
+        });
+      } catch (error) {
+        throw new WorkflowNonRetryableError("Database save failed: quiz persistence error");
+      }
     });
 
     return { quiz: savedQuiz };
   },
   {
     failureFunction: () => {
-      throw new WorkflowNonRetryableError("Failed to generate quiz");
+      throw new WorkflowNonRetryableError("Workflow execution failed: unspecified error");
     }
   }
 );
