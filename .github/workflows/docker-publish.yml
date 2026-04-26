@@ -31,7 +31,7 @@ jobs:
           push: true
           platforms: linux/arm64
           tags: hyd.ocir.io/${{ secrets.TENANCY_NAMESPACE }}/${{ github.repository }}:latest
-          args: |
+          build-args: |
             QSTASH_URL=${{ secrets.QSTASH_URL }}
             QSTASH_TOKEN=${{ secrets.QSTASH_TOKEN }}
             QSTASH_CURRENT_SIGNING_KEY=${{ secrets.QSTASH_CURRENT_SIGNING_KEY }}
