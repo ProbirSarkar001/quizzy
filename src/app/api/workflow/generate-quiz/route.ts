@@ -2,7 +2,7 @@ import { serve } from "@upstash/workflow/nextjs"
 import { generateText, Output } from "ai"
 import prisma from "@/lib/prisma"
 import { kebabCase } from "es-toolkit"
-import { QuizDoc } from "@/inngest/geretare-quiz/schema"
+import { QuizDoc } from "@/app/api/workflow/generate-quiz/schema"
 import { format } from "date-fns"
 import { model } from "@/lib/ai-models"
 import {
@@ -11,7 +11,7 @@ import {
   pickRandomSubCategory,
   fetchExistingQuizTitles,
   generateQuizPrompt
-} from "@/inngest/geretare-quiz/utils"
+} from "@/app/api/workflow/generate-quiz/utils"
 
 export const { POST } = serve(
   async (context) => {
