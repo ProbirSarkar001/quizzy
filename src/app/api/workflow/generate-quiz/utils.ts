@@ -8,7 +8,7 @@ export function randomDifficulty(): Difficulty {
 }
 
 export function randomCount(): number {
-  return 5 + Math.floor(Math.random() * 6); // random int 5–10
+  return 5 + Math.floor(Math.random() * 11); // random int 5–15
 }
 
 export async function pickRandomSubCategory(): Promise<{
