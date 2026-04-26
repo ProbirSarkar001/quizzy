@@ -1,40 +1,77 @@
 "use client";
 
-import { QuestionType } from "@/queries/home-page";
-import { useEffect, useMemo } from "react";
+import { memo, useEffect, useMemo, useCallback } from "react";
 import { Info, Circle, CheckCircle2, XCircle, Check } from "lucide-react";
+import { QuestionType } from "@/queries/home-page";
 import { useQuizStore } from "@/stores/quiz-store";
 import { cn } from "@/lib/utils";
+import { shuffle } from "es-toolkit/array";
 import QuizProgressBar from "./progress-bar";
 import QuizResults from "./quiz-results";
-import { shuffle } from 'es-toolkit/array';
 
-// Style configuration for answer states
-const buttonStyles = {
-  default: "bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-white/5",
+// Style constants
+const buttonVariants = {
+  base: "w-full text-left px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border shadow-sm text-sm sm:text-base transition-all",
+  default: "bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-700 hover:shadow-md hover:bg-gray-50 dark:hover:bg-white/5",
   correct: "bg-green-50 dark:bg-green-900/30 border-green-500 text-green-900 dark:text-green-100",
   incorrect: "bg-red-50 dark:bg-red-900/30 border-red-500 text-red-900 dark:text-red-100",
   showCorrect: "bg-green-50/70 dark:bg-green-900/20 border-green-400 text-green-900/90 dark:text-green-200",
   disabled: "bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 opacity-60",
 } as const;
 
-function AnswerIcon({ isPicked, isCorrect, answered }: { isPicked: boolean; isCorrect: boolean; answered: boolean }) {
-  if (!answered) {
-    return <Circle className={cn("h-4 w-4 shrink-0", isPicked ? "fill-gray-900 dark:fill-gray-100" : "")} />;
-  }
-
-  if (isPicked) {
-    return isCorrect
-      ? <CheckCircle2 className="h-4 w-4 shrink-0 text-green-600 dark:text-green-500" />
-      : <XCircle className="h-4 w-4 shrink-0 text-red-600 dark:text-red-500" />;
-  }
-
-  if (isCorrect) {
-    return <Check className="h-4 w-4 shrink-0 text-green-500" />;
-  }
-
+// Optimized AnswerIcon component
+const AnswerIcon = memo(function AnswerIcon({ isPicked, isCorrect, answered }: { isPicked: boolean; isCorrect: boolean; answered: boolean }) {
+  if (!answered) return <Circle className={cn("h-4 w-4 shrink-0 transition-all", isPicked && "fill-gray-900 dark:fill-gray-100")} />;
+  if (isPicked) return isCorrect ? <CheckCircle2 className="h-4 w-4 shrink-0 text-green-600 dark:text-green-500" /> : <XCircle className="h-4 w-4 shrink-0 text-red-600 dark:text-red-500" />;
+  if (isCorrect) return <Check className="h-4 w-4 shrink-0 text-green-500" />;
   return <Circle className="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-600" />;
-}
+});
+
+// Extracted AnswerButton component for better performance
+const AnswerButton = memo(function AnswerButton({
+  text,
+  index,
+  isPicked,
+  isCorrect,
+  answered,
+  disabled,
+  onSelect
+}: {
+  text: string;
+  index: number;
+  isPicked: boolean;
+  isCorrect: boolean;
+  answered: boolean;
+  disabled: boolean;
+  onSelect: (index: number) => void;
+}) {
+  const getVariant = useCallback(() => {
+    if (!answered) return buttonVariants.default;
+    if (isPicked && isCorrect) return buttonVariants.correct;
+    if (isPicked && !isCorrect) return buttonVariants.incorrect;
+    if (isCorrect) return buttonVariants.showCorrect;
+    return buttonVariants.disabled;
+  }, [answered, isPicked, isCorrect]);
+
+  return (
+    <button
+      type="button"
+      className={cn(
+        buttonVariants.base,
+        getVariant(),
+        !answered && !disabled && "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-300 dark:focus-visible:ring-white/20",
+        (!answered && disabled) && "cursor-not-allowed"
+      )}
+      onClick={() => onSelect(index)}
+      disabled={disabled}
+    >
+      <span className="flex items-center gap-3">
+        <AnswerIcon isPicked={isPicked} isCorrect={isCorrect} answered={answered} />
+        <span className="wrap-break-word">{text}</span>
+      </span>
+    </button>
+  );
+});
 
 export default function QuizQuestions({ questions }: { questions: QuestionType[] }) {
   const setCurrentQuiz = useQuizStore((state) => state.setCurrentQuiz);
@@ -43,7 +80,6 @@ export default function QuizQuestions({ questions }: { questions: QuestionType[]
   const setAnswer = useQuizStore((state) => state.setAnswer);
   const reset = useQuizStore((state) => state.reset);
 
-  // Shuffle questions once when component mounts
   const shuffledQuestions = useMemo(() => shuffle(questions), [questions]);
 
   useEffect(() => {
@@ -56,10 +92,7 @@ export default function QuizQuestions({ questions }: { questions: QuestionType[]
 
   return (
     <div id="questions" className="mx-auto max-w-7xl pb-32">
-      {/* Sticky Progress Bar */}
       <QuizProgressBar />
-
-      {/* Header */}
       <div className="px-4 sm:px-6 py-4 md:py-10">
         <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2">
           Quiz Questions
@@ -68,23 +101,19 @@ export default function QuizQuestions({ questions }: { questions: QuestionType[]
           Answer all questions below and test your knowledge.
         </p>
       </div>
-
-      {/* Questions List */}
       <ol className="max-w-4xl pl-4 sm:pl-7 pr-4 sm:pr-6 space-y-6 sm:space-y-8">
         {shuffledQuestions.map((q, i) => (
-          <li id={`question-${i + 1}`} key={q.id}>
+          <li key={q.id}>
             <QuestionCard q={q} index={i} selected={answers[i]} onAnswer={setAnswer} showResult={showResults} />
           </li>
         ))}
       </ol>
-
-      {/* Bottom Results Section */}
       <QuizResults />
     </div>
   );
 }
 
-function QuestionCard({
+const QuestionCard = memo(function QuestionCard({
   q,
   index,
   selected,
@@ -100,15 +129,14 @@ function QuestionCard({
   const isAnswered = selected !== undefined && selected !== null;
   const isDisabled = isAnswered || !!showResult;
 
-  const handleSelect = (answerIndex: number) => {
+  const handleSelect = useCallback((answerIndex: number) => {
     if (!isDisabled && onAnswer) {
       onAnswer(index, answerIndex);
     }
-  };
+  }, [index, isDisabled, onAnswer]);
 
   return (
     <div className="relative rounded-3xl sm:rounded-4xl border border-white/10 bg-white/50 dark:bg-slate-950/50 backdrop-blur-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.1)] p-5 sm:p-10">
-      {/* Premium Number Chip */}
       <div className="absolute -left-3 -top-3 sm:-left-4 sm:-top-4 flex items-center justify-center">
         <div className="relative">
           <div className="absolute inset-0 bg-violet-500 blur-lg opacity-40" />
@@ -122,46 +150,22 @@ function QuestionCard({
         {q.text}
       </h2>
 
-      {/* options */}
       <fieldset className="space-y-2">
         <legend className="sr-only">Question {index + 1}</legend>
-
-        {q.options.map((opt, i) => {
-          const isPicked = selected === i;
-          const isCorrect = i === q.correctIndex;
-          const answered = isAnswered || !!showResult;
-
-          const getStyle = () => {
-            if (!answered) return buttonStyles.default;
-            if (isPicked && isCorrect) return buttonStyles.correct;
-            if (isPicked && !isCorrect) return buttonStyles.incorrect;
-            if (isCorrect) return buttonStyles.showCorrect;
-            return buttonStyles.disabled;
-          };
-
-          return (
-            <button
-              key={i}
-              type="button"
-              className={cn(
-                "w-full text-left px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border shadow-sm text-sm sm:text-base transition-colors",
-                getStyle(),
-                !answered && !isDisabled && "cursor-pointer hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-300 dark:focus-visible:ring-white/20",
-                (!answered && isDisabled) && "cursor-not-allowed"
-              )}
-              onClick={() => handleSelect(i)}
-              disabled={isDisabled}
-            >
-              <span className="flex items-center gap-3">
-                <AnswerIcon isPicked={isPicked} isCorrect={isCorrect} answered={answered} />
-                <span className="wrap-break-word">{opt}</span>
-              </span>
-            </button>
-          );
-        })}
+        {q.options.map((opt, i) => (
+          <AnswerButton
+            key={i}
+            text={opt}
+            index={i}
+            isPicked={selected === i}
+            isCorrect={i === q.correctIndex}
+            answered={isAnswered || !!showResult}
+            disabled={isDisabled}
+            onSelect={handleSelect}
+          />
+        ))}
       </fieldset>
 
-      {/* explanation */}
       {isAnswered && q.explanation && (
         <div className="mt-3 sm:mt-4 rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-white/5 px-3 sm:px-4 py-3 text-sm text-gray-700 dark:text-gray-200">
           <div className="flex items-start gap-2">
@@ -172,4 +176,4 @@ function QuestionCard({
       )}
     </div>
   );
-}
+});
