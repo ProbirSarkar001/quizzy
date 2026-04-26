@@ -2,66 +2,38 @@
 
 import { QuestionType } from "@/queries/home-page";
 import { useEffect, useMemo } from "react";
-import { Info } from "lucide-react";
+import { Info, Circle, CheckCircle2, XCircle, Check } from "lucide-react";
 import { useQuizStore } from "@/stores/quiz-store";
 import { cn } from "@/lib/utils";
 import QuizProgressBar from "./progress-bar";
 import QuizResults from "./quiz-results";
 import { shuffle } from 'es-toolkit/array';
 
-// Helper function to get button styles based on state
-function getButtonStyles(isPicked: boolean, isCorrect: boolean, answered: boolean, disabled: boolean) {
-  const base = "w-full text-left px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border shadow-sm text-sm sm:text-base transition-colors";
+// Style configuration for answer states
+const buttonStyles = {
+  default: "bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-white/5",
+  correct: "bg-green-50 dark:bg-green-900/30 border-green-500 text-green-900 dark:text-green-100",
+  incorrect: "bg-red-50 dark:bg-red-900/30 border-red-500 text-red-900 dark:text-red-100",
+  showCorrect: "bg-green-50/70 dark:bg-green-900/20 border-green-400 text-green-900/90 dark:text-green-200",
+  disabled: "bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 opacity-60",
+} as const;
 
+function AnswerIcon({ isPicked, isCorrect, answered }: { isPicked: boolean; isCorrect: boolean; answered: boolean }) {
   if (!answered) {
-    return cn(
-      base,
-      "bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100",
-      "border-gray-200 dark:border-gray-700",
-      "hover:bg-gray-50 dark:hover:bg-white/5",
-      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-300 dark:focus-visible:ring-white/20",
-      disabled ? "cursor-not-allowed" : "cursor-pointer hover:shadow-md"
-    );
-  }
-
-  if (isPicked && isCorrect) {
-    return cn(base, "bg-green-50 dark:bg-green-900/30 border-green-500 text-green-900 dark:text-green-100");
-  }
-  if (isPicked && !isCorrect) {
-    return cn(base, "bg-red-50 dark:bg-red-900/30 border-red-500 text-red-900 dark:text-red-100");
-  }
-  if (isCorrect) {
-    return cn(base, "bg-green-50/70 dark:bg-green-900/20 border-green-400 text-green-900/90 dark:text-green-200");
-  }
-  return cn(
-    base,
-    "bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400",
-    "border-gray-200 dark:border-gray-700 opacity-60 cursor-not-allowed"
-  );
-}
-
-// Helper function to get dot styles based on state
-function getDotStyles(isPicked: boolean, isCorrect: boolean, answered: boolean) {
-  const base = "inline-block h-4 w-4 rounded-full border shrink-0";
-
-  if (!answered) {
-    return cn(base, isPicked
-      ? "border-gray-900 bg-gray-900 dark:border-gray-100 dark:bg-gray-100"
-      : "border-gray-300 bg-white dark:border-gray-600 dark:bg-gray-900"
-    );
+    return <Circle className={cn("h-4 w-4 shrink-0", isPicked ? "fill-gray-900 dark:fill-gray-100" : "")} />;
   }
 
   if (isPicked) {
-    return cn(base, isCorrect
-      ? "border-green-600 bg-green-600"
-      : "border-red-600 bg-red-600"
-    );
+    return isCorrect
+      ? <CheckCircle2 className="h-4 w-4 shrink-0 text-green-600 dark:text-green-500" />
+      : <XCircle className="h-4 w-4 shrink-0 text-red-600 dark:text-red-500" />;
   }
 
-  return cn(base, isCorrect
-    ? "border-green-500 bg-green-500"
-    : "border-gray-300 bg-white dark:border-gray-600 dark:bg-gray-900"
-  );
+  if (isCorrect) {
+    return <Check className="h-4 w-4 shrink-0 text-green-500" />;
+  }
+
+  return <Circle className="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-600" />;
 }
 
 export default function QuizQuestions({ questions }: { questions: QuestionType[] }) {
@@ -159,16 +131,29 @@ function QuestionCard({
           const isCorrect = i === q.correctIndex;
           const answered = isAnswered || !!showResult;
 
+          const getStyle = () => {
+            if (!answered) return buttonStyles.default;
+            if (isPicked && isCorrect) return buttonStyles.correct;
+            if (isPicked && !isCorrect) return buttonStyles.incorrect;
+            if (isCorrect) return buttonStyles.showCorrect;
+            return buttonStyles.disabled;
+          };
+
           return (
             <button
               key={i}
               type="button"
-              className={getButtonStyles(isPicked, isCorrect, answered, isDisabled)}
+              className={cn(
+                "w-full text-left px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border shadow-sm text-sm sm:text-base transition-colors",
+                getStyle(),
+                !answered && !isDisabled && "cursor-pointer hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-300 dark:focus-visible:ring-white/20",
+                (!answered && isDisabled) && "cursor-not-allowed"
+              )}
               onClick={() => handleSelect(i)}
               disabled={isDisabled}
             >
               <span className="flex items-center gap-3">
-                <span className={getDotStyles(isPicked, isCorrect, answered)} />
+                <AnswerIcon isPicked={isPicked} isCorrect={isCorrect} answered={answered} />
                 <span className="wrap-break-word">{opt}</span>
               </span>
             </button>
