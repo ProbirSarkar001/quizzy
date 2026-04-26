@@ -1,40 +1,38 @@
-import { serve } from "@upstash/workflow/nextjs"
-import { generateText, Output } from "ai"
-import prisma from "@/lib/prisma"
-import { kebabCase } from "es-toolkit"
-import { QuizDoc } from "@/app/api/workflow/generate-quiz/schema"
-import { format } from "date-fns"
-import { model } from "@/lib/ai-models"
+import { serve } from "@upstash/workflow/nextjs";
+import { generateText, Output } from "ai";
+import prisma from "@/lib/prisma";
+import { kebabCase } from "es-toolkit";
+import { QuizDoc } from "@/app/api/workflow/generate-quiz/schema";
+import { format } from "date-fns";
+import { model } from "@/lib/ai-models";
 import {
   randomDifficulty,
   randomCount,
   pickRandomSubCategory,
   fetchExistingQuizTitles,
   generateQuizPrompt
-} from "@/app/api/workflow/generate-quiz/utils"
+} from "@/app/api/workflow/generate-quiz/utils";
+import { WorkflowNonRetryableError } from "@upstash/workflow";
 
 export const { POST } = serve(
   async (context) => {
-    const today = format(new Date(), "MMMM d, yyyy")
-    const nonce = `${today}-${Math.random().toString(36).slice(2)}`
-    const difficulty = randomDifficulty()
-    const count = randomCount()
+    const today = format(new Date(), "MMMM d, yyyy");
+    const nonce = `${today}-${Math.random().toString(36).slice(2)}`;
+    const difficulty = randomDifficulty();
+    const count = randomCount();
 
     // STEP 0: Pick random category/subcategory and fetch existing titles
     const contextResult = await context.run("prepare-quiz-context", async () => {
-      const selected = await pickRandomSubCategory()
-      const existingTitles = await fetchExistingQuizTitles(
-        selected.category.id,
-        selected.subCategory.id
-      )
+      const selected = await pickRandomSubCategory();
+      const existingTitles = await fetchExistingQuizTitles(selected.category.id, selected.subCategory.id);
       return {
         category: selected.category,
         subCategory: selected.subCategory,
         existingTitles
-      }
-    })
+      };
+    });
 
-    const { category, subCategory, existingTitles } = contextResult
+    const { category, subCategory, existingTitles } = contextResult;
 
     // STEP 1: Generate quiz JSON
     const quizDoc = await context.run("generate-quiz-json", async () => {
@@ -53,9 +51,9 @@ export const { POST } = serve(
           nonce,
           existingTitles
         })
-      })
-      return result.output
-    })
+      });
+      return result.output;
+    });
 
     // STEP 2: Save quiz to database
     const savedQuiz = await context.run("save-quiz-db", async () => {
@@ -90,9 +88,14 @@ export const { POST } = serve(
           }
         },
         include: { questions: true }
-      })
-    })
+      });
+    });
 
-    return { quiz: savedQuiz }
+    return { quiz: savedQuiz };
+  },
+  {
+    failureFunction: () => {
+      throw new WorkflowNonRetryableError("Failed to generate quiz");
+    }
   }
-)
+);
