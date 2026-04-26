@@ -88,7 +88,6 @@ export interface QuizPromptOptions {
   difficulty: Difficulty;
   count: number;
   today: string;
-  nonce: string;
   existingTitles: Array<{
     title: string;
     quizPageTitle: string;
@@ -98,7 +97,7 @@ export interface QuizPromptOptions {
 }
 
 export function generateQuizPrompt(options: QuizPromptOptions): string {
-  const { categoryName, subCategoryName, difficulty, count, today, nonce, existingTitles } = options;
+  const { categoryName, subCategoryName, difficulty, count, today, existingTitles } = options;
 
   const existingTitlesText =
     existingTitles.length > 0
@@ -118,7 +117,6 @@ Difficulty: ${difficulty}
 Question count: ${count}
 
 Additional context (for freshness): Today is ${today}.
-Nonce: ${nonce}
 
 EXISTING TITLES TO AVOID (prevent duplicates and confusion):
 ${existingTitlesText}

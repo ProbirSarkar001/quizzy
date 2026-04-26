@@ -16,27 +16,14 @@ import { WorkflowNonRetryableError } from "@upstash/workflow";
 
 export const { POST } = serve(
   async (context) => {
-    const today = format(new Date(), "MMMM d, yyyy");
-    const nonce = `${today}-${Math.random().toString(36).slice(2)}`;
-    const difficulty = randomDifficulty();
-    const count = randomCount();
-
-    // STEP 0: Pick random category/subcategory and fetch existing titles
-    const contextResult = await context.run("prepare-quiz-context", async () => {
-      const selected = await pickRandomSubCategory();
-      const existingTitles = await fetchExistingQuizTitles(selected.category.id, selected.subCategory.id);
-      return {
-        category: selected.category,
-        subCategory: selected.subCategory,
-        existingTitles
-      };
-    });
-
-    const { category, subCategory, existingTitles } = contextResult;
-
-    // STEP 1: Generate quiz JSON
-    const quizDoc = await context.run("generate-quiz-json", async () => {
+    const generationResult = await context.run("generate-quiz", async () => {
       try {
+        const today = format(new Date(), "d MMM yyyy");
+        const difficulty = randomDifficulty();
+        const count = randomCount();
+        const selected = await pickRandomSubCategory();
+        const existingTitles = await fetchExistingQuizTitles(selected.category.id, selected.subCategory.id);
+
         const result = await generateText({
           model,
           output: Output.object({
@@ -44,30 +31,35 @@ export const { POST } = serve(
           }),
           system: `Strict JSON only. No markdown. No extra commentary.`,
           prompt: generateQuizPrompt({
-            categoryName: category.name,
-            subCategoryName: subCategory.name,
+            categoryName: selected.category.name,
+            subCategoryName: selected.subCategory.name,
             difficulty,
             count,
             today,
-            nonce,
             existingTitles
           })
         });
-        return result.output;
+
+        return {
+          categoryId: selected.category.id,
+          subCategoryId: selected.subCategory.id,
+          quizDoc: result.output
+        };
       } catch (error) {
-        throw new WorkflowNonRetryableError("AI generation failed: invalid quiz schema");
+        throw new WorkflowNonRetryableError("Quiz generation failed");
       }
     });
 
-    // STEP 2: Save quiz to database
-    const savedQuiz = await context.run("save-quiz-db", async () => {
+    const savedQuiz = await context.run("save-quiz", async () => {
       try {
+        const { categoryId, subCategoryId, quizDoc } = generationResult;
+
         return prisma.quiz.create({
           data: {
             quizPageTitle: quizDoc.quizPageTitle,
             quizPageDescription: quizDoc.quizPageDescription,
-            categoryId: category.id,
-            subCategoryId: subCategory.id,
+            categoryId,
+            subCategoryId,
             tags: {
               create: quizDoc.tags.map((name) => ({
                 tag: {
@@ -91,19 +83,18 @@ export const { POST } = serve(
                 explanation: q.explanation ?? null
               }))
             }
-          },
-          include: { questions: true }
+          }
         });
       } catch (error) {
-        throw new WorkflowNonRetryableError("Database save failed: quiz persistence error");
+        throw new WorkflowNonRetryableError("Quiz save failed");
       }
     });
 
-    return { quiz: savedQuiz };
+    return { quizId: savedQuiz.id };
   },
   {
     failureFunction: () => {
-      throw new WorkflowNonRetryableError("Workflow execution failed: unspecified error");
+      throw new WorkflowNonRetryableError("Workflow execution failed");
     }
   }
 );
