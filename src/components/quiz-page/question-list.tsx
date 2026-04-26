@@ -9,32 +9,26 @@ import { shuffle } from "es-toolkit/array";
 import QuizProgressBar from "./progress-bar";
 import QuizResults from "./quiz-results";
 
-// Type for shuffled question with updated correctIndex
-type ShuffledQuestion = QuestionType & { __shuffledCorrectIndex: number };
-
-// Shuffle options and return new question with updated correctIndex
-function shuffleOptions(question: QuestionType): ShuffledQuestion {
-  const indexedOptions = question.options.map((opt, i) => ({ opt, originalIndex: i }));
-  const shuffled = shuffle(indexedOptions);
-  const newOptions = shuffled.map(item => item.opt);
-  const newCorrectIndex = shuffled.findIndex(item => item.originalIndex === question.correctIndex);
+// Shuffle answer options and update correctIndex to match new positions
+function shuffleOptions(question: QuestionType): QuestionType {
+  const optionsWithIndex = question.options.map((text, index) => ({ text, index }));
+  const shuffled = shuffle(optionsWithIndex);
 
   return {
     ...question,
-    options: newOptions,
-    correctIndex: newCorrectIndex,
-    __shuffledCorrectIndex: newCorrectIndex
+    options: shuffled.map(o => o.text),
+    correctIndex: shuffled.findIndex(o => o.index === question.correctIndex)
   };
 }
 
-// Style constants
-const buttonVariants = {
-  base: "w-full text-left px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border shadow-sm text-sm sm:text-base transition-all",
+// Button styles
+const styles = {
+  button: "w-full text-left px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border shadow-sm text-sm sm:text-base transition-all",
   default: "bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-700 hover:shadow-md hover:bg-gray-50 dark:hover:bg-white/5",
   correct: "bg-green-50 dark:bg-green-900/30 border-green-500 text-green-900 dark:text-green-100",
-  incorrect: "bg-red-50 dark:bg-red-900/30 border-red-500 text-red-900 dark:text-red-100",
-  showCorrect: "bg-green-50/70 dark:bg-green-900/20 border-green-400 text-green-900/90 dark:text-green-200",
-  disabled: "bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 opacity-60",
+  wrong: "bg-red-50 dark:bg-red-900/30 border-red-500 text-red-900 dark:text-red-100",
+  reveal: "bg-green-50/70 dark:bg-green-900/20 border-green-400 text-green-900/90 dark:text-green-200",
+  faded: "bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 opacity-60",
 };
 
 function AnswerIcon({ isPicked, isCorrect, answered }: { isPicked: boolean; isCorrect: boolean; answered: boolean }) {
@@ -59,20 +53,20 @@ function AnswerButton({
   disabled: boolean;
   onClick: () => void;
 }) {
-  let variant = buttonVariants.default;
+  let variant = styles.default;
 
   if (answered) {
-    if (isPicked && isCorrect) variant = buttonVariants.correct;
-    else if (isPicked && !isCorrect) variant = buttonVariants.incorrect;
-    else if (isCorrect) variant = buttonVariants.showCorrect;
-    else variant = buttonVariants.disabled;
+    if (isPicked && isCorrect) variant = styles.correct;
+    else if (isPicked && !isCorrect) variant = styles.wrong;
+    else if (isCorrect) variant = styles.reveal;
+    else variant = styles.faded;
   }
 
   return (
     <button
       type="button"
       className={cn(
-        buttonVariants.base,
+        styles.button,
         variant,
         !answered && !disabled && "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-300 dark:focus-visible:ring-white/20",
         (!answered && disabled) && "cursor-not-allowed"
