@@ -31,6 +31,21 @@ COPY --from=dependencies /app/node_modules ./node_modules
 
 # Copy application source code
 COPY . .
+
+# Build arguments for QStash configuration
+ARG QSTASH_URL
+ARG QSTASH_TOKEN
+ARG QSTASH_CURRENT_SIGNING_KEY
+ARG QSTASH_NEXT_SIGNING_KEY
+ARG ENVIRONMENT
+
+# Set environment variables for build time
+ENV QSTASH_URL=${QSTASH_URL}
+ENV QSTASH_TOKEN=${QSTASH_TOKEN}
+ENV QSTASH_CURRENT_SIGNING_KEY=${QSTASH_CURRENT_SIGNING_KEY}
+ENV QSTASH_NEXT_SIGNING_KEY=${QSTASH_NEXT_SIGNING_KEY}
+ENV ENVIRONMENT=${ENVIRONMENT}
+
 RUN bun run prisma generate
 
 ENV NODE_ENV=production
@@ -56,6 +71,19 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
+
+# Runtime QStash configuration (inherited from build stage)
+ARG QSTASH_URL
+ARG QSTASH_TOKEN
+ARG QSTASH_CURRENT_SIGNING_KEY
+ARG QSTASH_NEXT_SIGNING_KEY
+ARG ENVIRONMENT
+
+ENV QSTASH_URL=${QSTASH_URL}
+ENV QSTASH_TOKEN=${QSTASH_TOKEN}
+ENV QSTASH_CURRENT_SIGNING_KEY=${QSTASH_CURRENT_SIGNING_KEY}
+ENV QSTASH_NEXT_SIGNING_KEY=${QSTASH_NEXT_SIGNING_KEY}
+ENV ENVIRONMENT=${ENVIRONMENT}
 
 # Next.js collects completely anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry
