@@ -9,6 +9,24 @@ import { shuffle } from "es-toolkit/array";
 import QuizProgressBar from "./progress-bar";
 import QuizResults from "./quiz-results";
 
+// Type for shuffled question with updated correctIndex
+type ShuffledQuestion = QuestionType & { __shuffledCorrectIndex: number };
+
+// Shuffle options and return new question with updated correctIndex
+function shuffleOptions(question: QuestionType): ShuffledQuestion {
+  const indexedOptions = question.options.map((opt, i) => ({ opt, originalIndex: i }));
+  const shuffled = shuffle(indexedOptions);
+  const newOptions = shuffled.map(item => item.opt);
+  const newCorrectIndex = shuffled.findIndex(item => item.originalIndex === question.correctIndex);
+
+  return {
+    ...question,
+    options: newOptions,
+    correctIndex: newCorrectIndex,
+    __shuffledCorrectIndex: newCorrectIndex
+  };
+}
+
 // Style constants
 const buttonVariants = {
   base: "w-full text-left px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border shadow-sm text-sm sm:text-base transition-all",
@@ -77,11 +95,15 @@ export default function QuizQuestions({ questions }: { questions: QuestionType[]
   const setAnswer = useQuizStore((state) => state.setAnswer);
   const reset = useQuizStore((state) => state.reset);
 
-  const shuffledQuestions = useMemo(() => shuffle(questions), [questions]);
+  // Shuffle options for each question (not the questions themselves)
+  const questionsWithShuffledOptions = useMemo(
+    () => questions.map(q => shuffleOptions(q)),
+    [questions]
+  );
 
   useEffect(() => {
-    setCurrentQuiz(shuffledQuestions);
-  }, [shuffledQuestions, setCurrentQuiz]);
+    setCurrentQuiz(questionsWithShuffledOptions);
+  }, [questionsWithShuffledOptions, setCurrentQuiz]);
 
   useEffect(() => {
     return () => reset();
@@ -99,7 +121,7 @@ export default function QuizQuestions({ questions }: { questions: QuestionType[]
         </p>
       </div>
       <ol className="max-w-4xl pl-4 sm:pl-7 pr-4 sm:pr-6 space-y-6 sm:space-y-8">
-        {shuffledQuestions.map((q, i) => (
+        {questionsWithShuffledOptions.map((q, i) => (
           <li key={q.id}>
             <QuestionCard q={q} index={i} selected={answers[i]} onAnswer={setAnswer} showResult={showResults} />
           </li>
