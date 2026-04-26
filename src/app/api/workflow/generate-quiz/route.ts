@@ -46,7 +46,8 @@ export const { POST } = serve(
           quizDoc: result.output
         };
       } catch (error) {
-        throw new WorkflowNonRetryableError("Quiz generation failed");
+        console.error("Quiz generation error:", error);
+        throw new WorkflowNonRetryableError(`Quiz generation failed: ${error instanceof Error ? error.message : "Unknown error"}`);
       }
     });
 
@@ -86,7 +87,8 @@ export const { POST } = serve(
           }
         });
       } catch (error) {
-        throw new WorkflowNonRetryableError("Quiz save failed");
+        console.error("Quiz save error:", error);
+        throw new WorkflowNonRetryableError(`Quiz save failed: ${error instanceof Error ? error.message : "Unknown error"}`);
       }
     });
 

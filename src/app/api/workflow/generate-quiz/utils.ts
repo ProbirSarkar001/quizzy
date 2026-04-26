@@ -4,7 +4,7 @@ type Difficulty = "easy" | "medium" | "hard";
 
 export function randomDifficulty(): Difficulty {
   const values: Difficulty[] = ["easy", "medium", "hard"];
-  return values[Math.floor(Math.random() * values.length)] as Difficulty;
+  return values[Math.floor(Math.random() * values.length)];
 }
 
 export function randomCount(): number {
@@ -12,8 +12,8 @@ export function randomCount(): number {
 }
 
 export async function pickRandomSubCategory(): Promise<{
-  category: { id: number; name: string; slug: string };
-  subCategory: { id: number; name: string; slug: string };
+  category: { id: number; name: string };
+  subCategory: { id: number; name: string };
 }> {
   const total = await prisma.category.count({
     where: { subCategories: { some: {} } }
@@ -29,7 +29,13 @@ export async function pickRandomSubCategory(): Promise<{
     where: { subCategories: { some: {} } },
     skip: skipCat,
     orderBy: { id: "asc" },
-    include: { subCategories: { select: { id: true, name: true, slug: true } } }
+    select: {
+      id: true,
+      name: true,
+      subCategories: {
+        select: { id: true, name: true }
+      }
+    }
   });
 
   if (!pickedCategory || pickedCategory.subCategories.length === 0) {
@@ -39,47 +45,27 @@ export async function pickRandomSubCategory(): Promise<{
   const subIdx = Math.floor(Math.random() * pickedCategory.subCategories.length);
   const pickedSub = pickedCategory.subCategories[subIdx];
 
-  return { category: pickedCategory, subCategory: pickedSub };
+  return {
+    category: { id: pickedCategory.id, name: pickedCategory.name },
+    subCategory: { id: pickedSub.id, name: pickedSub.name }
+  };
 }
 
 export async function fetchExistingQuizTitles(
   categoryId: number,
   subCategoryId: number,
   take: number = 10
-): Promise<
-  Array<{
-    title: string;
-    quizPageTitle: string;
-    description: string;
-    quizPageDescription: string;
-  }>
-> {
-  const existingQuizzes = await prisma.quiz.findMany({
+): Promise<Array<{ title: string }>> {
+  return prisma.quiz.findMany({
     where: {
       categoryId,
       subCategoryId
     },
     select: {
-      title: true,
-      quizPageTitle: true,
-      description: true,
-      quizPageDescription: true
+      title: true
     },
     take
   });
-
-  return existingQuizzes.map(
-    (quiz: {
-      title: string;
-      quizPageTitle: string;
-      description: string;
-      quizPageDescription: string;
-    }) => ({
-    title: quiz.title,
-    quizPageTitle: quiz.quizPageTitle,
-    description: quiz.description,
-    quizPageDescription: quiz.quizPageDescription
-  }));
 }
 
 export interface QuizPromptOptions {
@@ -88,12 +74,7 @@ export interface QuizPromptOptions {
   difficulty: Difficulty;
   count: number;
   today: string;
-  existingTitles: Array<{
-    title: string;
-    quizPageTitle: string;
-    description: string;
-    quizPageDescription: string;
-  }>;
+  existingTitles: Array<{ title: string }>;
 }
 
 export function generateQuizPrompt(options: QuizPromptOptions): string {
@@ -101,12 +82,7 @@ export function generateQuizPrompt(options: QuizPromptOptions): string {
 
   const existingTitlesText =
     existingTitles.length > 0
-      ? existingTitles
-          .map(
-            (t, i) =>
-              `${i + 1}. Title: "${t.title}" | Quiz Page Title: "${t.quizPageTitle}" | Description: "${t.description}"`
-          )
-          .join("\n")
+      ? existingTitles.map((t, i) => `${i + 1}. "${t.title}"`).join("\n")
       : "No existing titles in this category/subcategory";
 
   return `
