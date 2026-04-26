@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useEffect, useMemo, useCallback } from "react";
+import { useEffect, useMemo } from "react";
 import { Info, Circle, CheckCircle2, XCircle, Check } from "lucide-react";
 import { QuestionType } from "@/queries/home-page";
 import { useQuizStore } from "@/stores/quiz-store";
@@ -19,50 +19,48 @@ const buttonVariants = {
   disabled: "bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 opacity-60",
 } as const;
 
-// Optimized AnswerIcon component
-const AnswerIcon = memo(function AnswerIcon({ isPicked, isCorrect, answered }: { isPicked: boolean; isCorrect: boolean; answered: boolean }) {
+function AnswerIcon({ isPicked, isCorrect, answered }: { isPicked: boolean; isCorrect: boolean; answered: boolean }) {
   if (!answered) return <Circle className={cn("h-4 w-4 shrink-0 transition-all", isPicked && "fill-gray-900 dark:fill-gray-100")} />;
   if (isPicked) return isCorrect ? <CheckCircle2 className="h-4 w-4 shrink-0 text-green-600 dark:text-green-500" /> : <XCircle className="h-4 w-4 shrink-0 text-red-600 dark:text-red-500" />;
   if (isCorrect) return <Check className="h-4 w-4 shrink-0 text-green-500" />;
   return <Circle className="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-600" />;
-});
+}
 
-// Extracted AnswerButton component for better performance
-const AnswerButton = memo(function AnswerButton({
+function AnswerButton({
   text,
-  index,
   isPicked,
   isCorrect,
   answered,
   disabled,
-  onSelect
+  onClick
 }: {
   text: string;
-  index: number;
   isPicked: boolean;
   isCorrect: boolean;
   answered: boolean;
   disabled: boolean;
-  onSelect: (index: number) => void;
+  onClick: () => void;
 }) {
-  const getVariant = useCallback(() => {
-    if (!answered) return buttonVariants.default;
-    if (isPicked && isCorrect) return buttonVariants.correct;
-    if (isPicked && !isCorrect) return buttonVariants.incorrect;
-    if (isCorrect) return buttonVariants.showCorrect;
-    return buttonVariants.disabled;
-  }, [answered, isPicked, isCorrect]);
+  const variant = !answered
+    ? buttonVariants.default
+    : isPicked && isCorrect
+      ? buttonVariants.correct
+      : isPicked && !isCorrect
+        ? buttonVariants.incorrect
+        : isCorrect
+          ? buttonVariants.showCorrect
+          : buttonVariants.disabled;
 
   return (
     <button
       type="button"
       className={cn(
         buttonVariants.base,
-        getVariant(),
+        variant,
         !answered && !disabled && "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-300 dark:focus-visible:ring-white/20",
         (!answered && disabled) && "cursor-not-allowed"
       )}
-      onClick={() => onSelect(index)}
+      onClick={onClick}
       disabled={disabled}
     >
       <span className="flex items-center gap-3">
@@ -71,7 +69,7 @@ const AnswerButton = memo(function AnswerButton({
       </span>
     </button>
   );
-});
+}
 
 export default function QuizQuestions({ questions }: { questions: QuestionType[] }) {
   const setCurrentQuiz = useQuizStore((state) => state.setCurrentQuiz);
@@ -113,7 +111,7 @@ export default function QuizQuestions({ questions }: { questions: QuestionType[]
   );
 }
 
-const QuestionCard = memo(function QuestionCard({
+function QuestionCard({
   q,
   index,
   selected,
@@ -128,12 +126,6 @@ const QuestionCard = memo(function QuestionCard({
 }) {
   const isAnswered = selected !== undefined && selected !== null;
   const isDisabled = isAnswered || !!showResult;
-
-  const handleSelect = useCallback((answerIndex: number) => {
-    if (!isDisabled && onAnswer) {
-      onAnswer(index, answerIndex);
-    }
-  }, [index, isDisabled, onAnswer]);
 
   return (
     <div className="relative rounded-3xl sm:rounded-4xl border border-white/10 bg-white/50 dark:bg-slate-950/50 backdrop-blur-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.1)] p-5 sm:p-10">
@@ -156,12 +148,11 @@ const QuestionCard = memo(function QuestionCard({
           <AnswerButton
             key={i}
             text={opt}
-            index={i}
             isPicked={selected === i}
             isCorrect={i === q.correctIndex}
             answered={isAnswered || !!showResult}
             disabled={isDisabled}
-            onSelect={handleSelect}
+            onClick={() => !isDisabled && onAnswer?.(index, i)}
           />
         ))}
       </fieldset>
@@ -176,4 +167,4 @@ const QuestionCard = memo(function QuestionCard({
       )}
     </div>
   );
-});
+}
