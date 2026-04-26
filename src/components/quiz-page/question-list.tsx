@@ -17,7 +17,7 @@ const buttonVariants = {
   incorrect: "bg-red-50 dark:bg-red-900/30 border-red-500 text-red-900 dark:text-red-100",
   showCorrect: "bg-green-50/70 dark:bg-green-900/20 border-green-400 text-green-900/90 dark:text-green-200",
   disabled: "bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 opacity-60",
-} as const;
+};
 
 function AnswerIcon({ isPicked, isCorrect, answered }: { isPicked: boolean; isCorrect: boolean; answered: boolean }) {
   if (!answered) return <Circle className={cn("h-4 w-4 shrink-0 transition-all", isPicked && "fill-gray-900 dark:fill-gray-100")} />;
@@ -41,15 +41,14 @@ function AnswerButton({
   disabled: boolean;
   onClick: () => void;
 }) {
-  const variant = !answered
-    ? buttonVariants.default
-    : isPicked && isCorrect
-      ? buttonVariants.correct
-      : isPicked && !isCorrect
-        ? buttonVariants.incorrect
-        : isCorrect
-          ? buttonVariants.showCorrect
-          : buttonVariants.disabled;
+  let variant = buttonVariants.default;
+
+  if (answered) {
+    if (isPicked && isCorrect) variant = buttonVariants.correct;
+    else if (isPicked && !isCorrect) variant = buttonVariants.incorrect;
+    else if (isCorrect) variant = buttonVariants.showCorrect;
+    else variant = buttonVariants.disabled;
+  }
 
   return (
     <button
