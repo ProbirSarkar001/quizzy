@@ -1,10 +1,68 @@
 "use client";
 
 import { QuestionType } from "@/queries/home-page";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
+import { Info } from "lucide-react";
 import { useQuizStore } from "@/stores/quiz-store";
+import { cn } from "@/lib/utils";
 import QuizProgressBar from "./progress-bar";
 import QuizResults from "./quiz-results";
+import { shuffle } from 'es-toolkit/array';
+
+// Helper function to get button styles based on state
+function getButtonStyles(isPicked: boolean, isCorrect: boolean, answered: boolean, disabled: boolean) {
+  const base = "w-full text-left px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border shadow-sm text-sm sm:text-base transition-colors";
+
+  if (!answered) {
+    return cn(
+      base,
+      "bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100",
+      "border-gray-200 dark:border-gray-700",
+      "hover:bg-gray-50 dark:hover:bg-white/5",
+      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-300 dark:focus-visible:ring-white/20",
+      disabled ? "cursor-not-allowed" : "cursor-pointer hover:shadow-md"
+    );
+  }
+
+  if (isPicked && isCorrect) {
+    return cn(base, "bg-green-50 dark:bg-green-900/30 border-green-500 text-green-900 dark:text-green-100");
+  }
+  if (isPicked && !isCorrect) {
+    return cn(base, "bg-red-50 dark:bg-red-900/30 border-red-500 text-red-900 dark:text-red-100");
+  }
+  if (isCorrect) {
+    return cn(base, "bg-green-50/70 dark:bg-green-900/20 border-green-400 text-green-900/90 dark:text-green-200");
+  }
+  return cn(
+    base,
+    "bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400",
+    "border-gray-200 dark:border-gray-700 opacity-60 cursor-not-allowed"
+  );
+}
+
+// Helper function to get dot styles based on state
+function getDotStyles(isPicked: boolean, isCorrect: boolean, answered: boolean) {
+  const base = "inline-block h-4 w-4 rounded-full border shrink-0";
+
+  if (!answered) {
+    return cn(base, isPicked
+      ? "border-gray-900 bg-gray-900 dark:border-gray-100 dark:bg-gray-100"
+      : "border-gray-300 bg-white dark:border-gray-600 dark:bg-gray-900"
+    );
+  }
+
+  if (isPicked) {
+    return cn(base, isCorrect
+      ? "border-green-600 bg-green-600"
+      : "border-red-600 bg-red-600"
+    );
+  }
+
+  return cn(base, isCorrect
+    ? "border-green-500 bg-green-500"
+    : "border-gray-300 bg-white dark:border-gray-600 dark:bg-gray-900"
+  );
+}
 
 export default function QuizQuestions({ questions }: { questions: QuestionType[] }) {
   const setCurrentQuiz = useQuizStore((state) => state.setCurrentQuiz);
@@ -13,9 +71,12 @@ export default function QuizQuestions({ questions }: { questions: QuestionType[]
   const setAnswer = useQuizStore((state) => state.setAnswer);
   const reset = useQuizStore((state) => state.reset);
 
+  // Shuffle questions once when component mounts
+  const shuffledQuestions = useMemo(() => shuffle(questions), [questions]);
+
   useEffect(() => {
-    setCurrentQuiz(questions);
-  }, [questions, setCurrentQuiz]);
+    setCurrentQuiz(shuffledQuestions);
+  }, [shuffledQuestions, setCurrentQuiz]);
 
   useEffect(() => {
     return () => reset();
@@ -38,7 +99,7 @@ export default function QuizQuestions({ questions }: { questions: QuestionType[]
 
       {/* Questions List */}
       <ol className="max-w-4xl pl-4 sm:pl-7 pr-4 sm:pr-6 space-y-6 sm:space-y-8">
-        {questions.map((q, i) => (
+        {shuffledQuestions.map((q, i) => (
           <li id={`question-${i + 1}`} key={q.id}>
             <QuestionCard q={q} index={i} selected={answers[i]} onAnswer={setAnswer} showResult={showResults} />
           </li>
@@ -98,63 +159,16 @@ function QuestionCard({
           const isCorrect = i === q.correctIndex;
           const answered = isAnswered || !!showResult;
 
-          // base (light + dark)
-          let cls =
-            "w-full text-left px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border shadow-sm text-sm sm:text-base " +
-            "bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 " +
-            "border-gray-200 dark:border-gray-700 " +
-            "hover:bg-gray-50 dark:hover:bg-white/5 " +
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-300 dark:focus-visible:ring-white/20 " +
-            (isDisabled ? "cursor-not-allowed" : "cursor-pointer hover:shadow-md");
-
-          if (answered) {
-            if (isPicked && isCorrect) {
-              cls =
-                "w-full text-left px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border shadow-sm text-sm sm:text-base " +
-                "bg-green-50 dark:bg-green-900/30 border-green-500 " +
-                "text-green-900 dark:text-green-100";
-            } else if (isPicked && !isCorrect) {
-              cls =
-                "w-full text-left px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border shadow-sm text-sm sm:text-base " +
-                "bg-red-50 dark:bg-red-900/30 border-red-500 " +
-                "text-red-900 dark:text-red-100";
-            } else if (isCorrect) {
-              cls =
-                "w-full text-left px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border shadow-sm text-sm sm:text-base " +
-                "bg-green-50/70 dark:bg-green-900/20 border-green-400 " +
-                "text-green-900/90 dark:text-green-200";
-            } else {
-              cls =
-                "w-full text-left px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border shadow-sm text-sm sm:text-base " +
-                "bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400 " +
-                "border-gray-200 dark:border-gray-700 opacity-60 cursor-not-allowed";
-            }
-          }
-
-          // decorative radio dot (light + dark states)
-          const dotBase = "inline-block h-4 w-4 rounded-full border";
-          const dotClass = answered
-            ? isPicked
-              ? isCorrect
-                ? "border-green-600 bg-green-600"
-                : "border-red-600 bg-red-600"
-              : isCorrect
-                ? "border-green-500 bg-green-500"
-                : "border-gray-300 bg-white dark:border-gray-600 dark:bg-gray-900"
-            : isPicked
-              ? "border-gray-900 bg-gray-900 dark:border-gray-100 dark:bg-gray-100"
-              : "border-gray-300 bg-white dark:border-gray-600 dark:bg-gray-900";
-
           return (
             <button
               key={i}
               type="button"
-              className={cls}
+              className={getButtonStyles(isPicked, isCorrect, answered, isDisabled)}
               onClick={() => handleSelect(i)}
               disabled={isDisabled}
             >
               <span className="flex items-center gap-3">
-                <span className={`${dotBase} ${dotClass} shrink-0`} />
+                <span className={getDotStyles(isPicked, isCorrect, answered)} />
                 <span className="wrap-break-word">{opt}</span>
               </span>
             </button>
@@ -166,19 +180,7 @@ function QuestionCard({
       {isAnswered && q.explanation && (
         <div className="mt-3 sm:mt-4 rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-white/5 px-3 sm:px-4 py-3 text-sm text-gray-700 dark:text-gray-200">
           <div className="flex items-start gap-2">
-            <svg
-              className="w-4 h-4 mt-0.5 text-blue-500 dark:text-blue-400 shrink-0"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
+            <Info className="w-4 h-4 mt-0.5 text-blue-500 dark:text-blue-400 shrink-0" />
             <span>{q.explanation}</span>
           </div>
         </div>
