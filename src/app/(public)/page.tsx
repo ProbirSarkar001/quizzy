@@ -44,7 +44,7 @@ export default async function Home() {
   if (!stats) return null;
 
   return (
-    <>
+    <div>
       <HeroSection
         totalQuizzes={stats.totalQuizzes}
         totalCategories={stats.totalCategories}
@@ -60,12 +60,12 @@ export default async function Home() {
 
       <CategoryFilters categories={categoriesList} />
       {data.map((cat) => (
-        <section id={cat.slug} className="container mx-auto pt-16">
+        <section key={cat.slug} id={cat.slug} className="container mx-auto pt-16">
           {/* Title */}
           <SectionHeader id={cat.slug} title={cat.name} />
           <QuizListing quizzes={cat.quizzes} />
         </section>
       ))}
-    </>
+    </div>
   );
 }
