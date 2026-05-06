@@ -1,6 +1,5 @@
 "use client";
 import { Search, Filter } from "lucide-react";
-import { motion } from "motion/react";
 
 const SearchSection = () => {
   return (
@@ -18,9 +17,9 @@ const SearchSection = () => {
           </div>
 
           {/* Filter Button */}
-          <motion.button whileTap={{ scale: 0.9 }} className="p-3 rounded-xl bg-white dark:bg-gray-800">
+          <button className="p-3 rounded-xl bg-white dark:bg-gray-800 active:scale-95 transition-transform">
             <Filter className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-          </motion.button>
+          </button>
         </div>
       </div>
     </div>

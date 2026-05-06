@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "motion/react";
 import { TrendingUp, ArrowRight } from "lucide-react";
 import { QuizCard } from "@/queries/home-page";
 import Link from "next/link";
@@ -33,14 +32,7 @@ export default function TrendingSection({ quizzes }: TrendingSectionProps) {
 
       <div className="flex gap-6 overflow-x-auto pb-8 no-scrollbar mask-fade-right">
         {quizzes.map((quiz, i) => (
-          <motion.div
-            key={quiz.id}
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: i * 0.1 }}
-            className="min-w-[300px] sm:min-w-[350px]"
-          >
+          <div key={quiz.id} className="min-w-[300px] sm:min-w-[350px]">
             <Link href={`/quiz/${quiz.slug}`}>
               <Card className="group relative h-48 rounded-[2rem] border-0 overflow-hidden shadow-2xl">
                 <div
@@ -67,7 +59,7 @@ export default function TrendingSection({ quizzes }: TrendingSectionProps) {
                 </div>
               </Card>
             </Link>
-          </motion.div>
+          </div>
         ))}
       </div>
     </section>

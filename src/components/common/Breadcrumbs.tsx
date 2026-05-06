@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { ChevronRight, Home } from "lucide-react";
-import { motion } from "motion/react";
 
 export interface BreadcrumbItem {
   label: string;
@@ -27,14 +26,8 @@ export default function Breadcrumbs({ items }: BreadcrumbsProps) {
             Home
           </Link>
         </li>
-        {items.map((item, index) => (
-          <motion.li
-            key={item.href}
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: index * 0.1 }}
-            className="flex items-center"
-          >
+        {items.map((item) => (
+          <li key={item.href} className="flex items-center">
             <ChevronRight className="w-4 h-4 text-slate-400 mx-1" />
             <Link
               href={item.href}
@@ -47,7 +40,7 @@ export default function Breadcrumbs({ items }: BreadcrumbsProps) {
             >
               {item.label}
             </Link>
-          </motion.li>
+          </li>
         ))}
       </ol>
     </nav>
