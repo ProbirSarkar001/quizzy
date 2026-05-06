@@ -1,6 +1,6 @@
 "use client";
 
-import { Sparkles, Target, Layers, Trophy } from "lucide-react";
+import { Sparkles, Target, Layers } from "lucide-react";
 import { QuizPageType } from "@/queries/home-page";
 import { QuizDifficulty } from "@/generated/prisma/enums";
 
@@ -48,27 +48,20 @@ export default function QuizHero({ quiz, breadcrumbs }: { quiz: QuizPageType; br
             <div
               className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 dark:bg-white/5 border border-gray-200 dark:border-white/10 backdrop-blur-md mb-4`}
             >
-              <Sparkles className={`w-3.5 h-3.5 text-transparent bg-clip-text bg-gradient-to-r ${bgColor} bg-white`} />
               <span className="text-[10px] font-bold tracking-widest text-gray-700 dark:text-white/80 uppercase">
                 {quiz.category?.name || "General"}
               </span>
             </div>
 
-            <h1
-              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 leading-tight break-words"
-            >
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 leading-tight break-words">
               {quiz.title}
             </h1>
 
-            <p
-              className="text-sm sm:text-base text-gray-600 dark:text-slate-400 max-w-2xl mb-5 leading-relaxed break-words"
-            >
+            <p className="text-sm sm:text-base text-gray-600 dark:text-slate-400 max-w-2xl mb-5 leading-relaxed break-words">
               {quiz.description || "Challenge yourself with this expertly curated quiz and see how you rank!"}
             </p>
 
-            <div
-              className="flex flex-wrap justify-center lg:justify-start gap-2"
-            >
+            <div className="flex flex-wrap justify-center lg:justify-start gap-2">
               {quiz.tags.map((tag, i) => (
                 <span
                   key={tag.tagId}
@@ -78,52 +71,35 @@ export default function QuizHero({ quiz, breadcrumbs }: { quiz: QuizPageType; br
                 </span>
               ))}
             </div>
-          </div>
 
-          {/* Right Side: Stats Panel */}
-          <div
-            className="w-full max-w-xs"
-          >
-            <div className="relative p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-white/60 to-white/20 dark:from-white/10 dark:to-white/0 border border-gray-200 dark:border-white/10 backdrop-blur-2xl overflow-hidden shadow-xl dark:shadow-2xl">
-              <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                <Trophy className="w-4 h-4 text-amber-500 dark:text-amber-400" />
-                Quiz Stats
-              </h3>
-
-              <div className="space-y-2.5">
-                <div className="flex items-center justify-between p-2.5 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/5 group hover:bg-gray-200 dark:hover:bg-white/10 transition-colors">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-violet-100 dark:bg-violet-500/20 flex items-center justify-center border border-violet-200 dark:border-violet-500/20">
-                      <Target className="w-4 h-4 text-violet-600 dark:text-violet-400" />
-                    </div>
-                    <span className="text-xs font-medium text-gray-700 dark:text-slate-300">Questions</span>
-                  </div>
-                  <span className="text-lg font-bold text-gray-900 dark:text-white">{quiz._count.questions}</span>
-                </div>
-
-                <div className="flex items-center justify-between p-2.5 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/5 group hover:bg-gray-200 dark:hover:bg-white/10 transition-colors">
-                  <div className="flex items-center gap-2">
-                    <div
-                      className={`w-8 h-8 rounded-lg bg-gray-100 dark:bg-white/5 flex items-center justify-center border border-gray-200 dark:border-white/10`}
-                    >
-                      <Layers className={`w-4 h-4 ${textColor}`.replace('text-emerald-400', 'text-emerald-600 dark:text-emerald-400').replace('text-amber-400', 'text-amber-600 dark:text-amber-400').replace('text-rose-400', 'text-rose-600 dark:text-rose-400').replace('text-violet-400', 'text-violet-600 dark:text-violet-400')} />
-                    </div>
-                    <span className="text-xs font-medium text-gray-700 dark:text-slate-300">Difficulty</span>
-                  </div>
-                  <span
-                    className={`text-xs font-black uppercase tracking-widest text-transparent bg-clip-text bg-gradient-to-r ${bgColor} bg-white`}
-                  >
-                    {quiz.difficulty}
-                  </span>
-                </div>
+            {/* Questions & Difficulty Info */}
+            <div className="flex flex-wrap justify-center lg:justify-start gap-4 mt-5">
+              <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/80 dark:bg-white/5 border border-gray-200 dark:border-white/10 backdrop-blur-sm">
+                <Target
+                  className={`w-4 h-4 ${textColor}`
+                    .replace("text-emerald-400", "text-emerald-600 dark:text-emerald-400")
+                    .replace("text-amber-400", "text-amber-600 dark:text-amber-400")
+                    .replace("text-rose-400", "text-rose-600 dark:text-rose-400")
+                    .replace("text-violet-400", "text-violet-600 dark:text-violet-400")}
+                />
+                <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                  {quiz._count.questions} Questions
+                </span>
               </div>
-
-              <button
-                onClick={() => document.getElementById("questions")?.scrollIntoView({ behavior: "smooth" })}
-                className={`w-full mt-4 py-2 rounded-xl bg-gradient-to-r ${bgColor} text-white font-semibold shadow-lg shadow-violet-500/20 hover:shadow-violet-500/40 transition-all text-xs uppercase tracking-widest`}
-              >
-                Start Quiz
-              </button>
+              <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/80 dark:bg-white/5 border border-gray-200 dark:border-white/10 backdrop-blur-sm">
+                <Layers
+                  className={`w-4 h-4 ${textColor}`
+                    .replace("text-emerald-400", "text-emerald-600 dark:text-emerald-400")
+                    .replace("text-amber-400", "text-amber-600 dark:text-amber-400")
+                    .replace("text-rose-400", "text-rose-600 dark:text-rose-400")
+                    .replace("text-violet-400", "text-violet-600 dark:text-violet-400")}
+                />
+                <span
+                  className={`text-sm font-black uppercase tracking-wider text-transparent bg-clip-text bg-linear-to-r ${bgColor} bg-white`}
+                >
+                  {quiz.difficulty}
+                </span>
+              </div>
             </div>
           </div>
         </div>

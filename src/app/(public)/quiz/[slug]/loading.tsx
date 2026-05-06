@@ -39,13 +39,13 @@ export default function QuizPageLoading() {
               </div>
 
               {/* Title Skeleton */}
-              <div className="mb-4 space-y-2 flex flex-col items-center lg:items-start">
+              <div className="mb-2 space-y-2 flex flex-col items-center lg:items-start">
                 <ShimmerSkeleton className="h-9 sm:h-10 md:h-12 lg:h-14 w-3/4 rounded-xl" />
                 <ShimmerSkeleton className="h-9 sm:h-10 md:h-12 lg:h-14 w-1/2 rounded-xl" />
               </div>
 
               {/* Description Skeleton */}
-              <div className="mb-5 space-y-2 max-w-2xl flex flex-col items-center lg:items-start">
+              <div className="mb-5 space-y-2 max-w-2xl flex flex-col items-center lg:items-start mt-2">
                 <ShimmerSkeleton className="h-5 w-full rounded-lg" />
                 <ShimmerSkeleton className="h-5 w-5/6 rounded-lg" />
               </div>
@@ -56,42 +56,11 @@ export default function QuizPageLoading() {
                   <ShimmerSkeleton key={i} className="h-8 w-20 rounded-lg" />
                 ))}
               </div>
-            </div>
 
-            {/* Right Side: Stats Panel Skeleton */}
-            <div className="w-full max-w-xs">
-              <div className="relative p-1 rounded-2xl bg-linear-to-br from-gray-200 to-gray-100 dark:from-white/10 dark:to-white/0 border border-gray-200 dark:border-white/10 backdrop-blur-2xl overflow-hidden">
-                <div className="bg-white/80 dark:bg-slate-900/50 rounded-[1.8rem] p-5">
-                  {/* Stats Title */}
-                  <div className="mb-4">
-                    <ShimmerSkeleton className="h-5 w-36 rounded-lg" />
-                  </div>
-
-                  <div className="space-y-3">
-                    {/* Total Questions Skeleton */}
-                    <div className="flex items-center justify-between p-3 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/5">
-                      <div className="flex items-center gap-2">
-                        <ShimmerSkeleton className="h-8 w-8 rounded-lg" />
-                        <ShimmerSkeleton className="h-4 w-24 rounded-lg" />
-                      </div>
-                      <ShimmerSkeleton className="h-6 w-6 rounded-lg" />
-                    </div>
-
-                    {/* Difficulty Level Skeleton */}
-                    <div className="flex items-center justify-between p-3 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/5">
-                      <div className="flex items-center gap-2">
-                        <ShimmerSkeleton className="h-8 w-8 rounded-lg" />
-                        <ShimmerSkeleton className="h-4 w-20 rounded-lg" />
-                      </div>
-                      <ShimmerSkeleton className="h-4 w-16 rounded-lg" />
-                    </div>
-                  </div>
-
-                  {/* CTA Button Skeleton */}
-                  <div className="mt-5">
-                    <ShimmerSkeleton className="h-10 w-full rounded-xl" />
-                  </div>
-                </div>
+              {/* Questions & Difficulty Info Skeleton */}
+              <div className="flex flex-wrap justify-center lg:justify-start gap-4 mt-5">
+                <ShimmerSkeleton className="h-10 w-32 rounded-xl" />
+                <ShimmerSkeleton className="h-10 w-28 rounded-xl" />
               </div>
             </div>
           </div>

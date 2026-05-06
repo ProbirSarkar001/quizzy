@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ChevronRight, Home } from "lucide-react";
 import { motion } from "motion/react";
 
-interface BreadcrumbItem {
+export interface BreadcrumbItem {
   label: string;
   href: string;
   active?: boolean;
