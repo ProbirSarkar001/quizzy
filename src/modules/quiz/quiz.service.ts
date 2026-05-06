@@ -92,6 +92,11 @@ export abstract class QuizService {
                   quizzes: true
                 }
               }
+            },
+            orderBy: {
+              quizzes: {
+                _count: "desc"
+              }
             }
           },
           _count: {
@@ -147,6 +152,11 @@ export abstract class QuizService {
                 select: {
                   quizzes: true
                 }
+              }
+            },
+            orderBy: {
+              quizzes: {
+                _count: "desc"
               }
             }
           },

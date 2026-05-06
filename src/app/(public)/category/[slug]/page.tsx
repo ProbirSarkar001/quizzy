@@ -3,10 +3,46 @@ import SubCategoryFilters from "@/components/category/sub-category-filter";
 import { QuizCard } from "@/components/home-page/quiz-listing";
 import { notFound } from "next/navigation";
 import { api } from "@/lib/eden";
+import type { Metadata } from "next";
+
 type Props = {
   params: Promise<{ slug: string }>;
   searchParams: Promise<{ [key: string]: string | undefined }>;
 };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+
+  const { data: categoryData } = await api.quiz["by-category"].get({
+    query: {
+      categorySlug: slug,
+      page: 1,
+      perPage: 1
+    },
+    fetch: {
+      cache: "force-cache",
+      next: {
+        revalidate: 60 * 60
+      }
+    }
+  });
+
+  if (!categoryData?.category) {
+    notFound();
+  }
+
+  const categoryName = categoryData.category.name;
+
+  return {
+    title: `${categoryName} Quizzes - Quizzy`,
+    description: `Explore ${categoryName.toLowerCase()} quizzes on Quizzy. Test your knowledge with our collection of expertly crafted questions.`,
+    openGraph: {
+      title: `${categoryName} Quizzes - Quizzy`,
+      description: `Explore ${categoryName.toLowerCase()} quizzes on Quizzy. Test your knowledge with our collection of expertly crafted questions.`,
+      type: "website"
+    }
+  };
+}
 
 export default async function CategoryPage({ params, searchParams }: Props) {
   const { slug } = await params;
@@ -53,7 +89,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
         {quizzesList && quizzesList.length > 0 && (
           <div className="px-4 mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 container mx-auto">
             {quizzesList.map((q, i) => (
-              <QuizCard key={q.id} delay={0.1} index={i} quiz={q} />
+              <QuizCard key={q.id} index={i} quiz={q} />
             ))}
           </div>
         )}
