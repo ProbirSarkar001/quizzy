@@ -117,7 +117,7 @@ export default function QuizQuestions({ questions }: { questions: QuestionType[]
 
   return (
     <div id="questions" className="mx-auto max-w-7xl pb-8">
-      <div className="border-t border-gray-200 dark:border-white/10" />
+ 
 
       <div className="px-4 sm:px-6 py-6 md:py-10">
         <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">Quiz Questions</h2>
