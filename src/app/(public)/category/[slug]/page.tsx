@@ -1,6 +1,6 @@
 import CategoryHero from "@/components/category/CategoryHero";
 import SubCategoryFilters from "@/components/category/sub-category-filter";
-import { QuizCard } from "@/components/home-page/quiz-listing";
+import { QuizCard } from "@/components/home-page/quiz-card";
 import JsonLd from "@/components/common/JsonLd";
 import { generateCategorySchema, generateBreadcrumbSchema } from "@/lib/structured-data";
 import {

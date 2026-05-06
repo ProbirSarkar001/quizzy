@@ -1,7 +1,7 @@
 import QuizPageHero from "@/components/quiz-page/quiz-page.hero";
 import { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
-import { QuizCard } from "@/components/home-page/quiz-listing";
+import { QuizCard } from "@/components/home-page/quiz-card";
 import ShareButtons from "@/components/common/ShareButtons";
 import TelegramCTA from "@/components/common/telegram-cta";
 import { Sparkles } from "lucide-react";
