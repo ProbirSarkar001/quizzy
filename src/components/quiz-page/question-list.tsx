@@ -85,7 +85,7 @@ export default function QuizQuestions({ questions }: { questions: QuestionType[]
   const answers = useQuizStore((state) => state.answers);
   const setAnswer = useQuizStore((state) => state.setAnswer);
   const reset = useQuizStore((state) => state.reset);
-  const { correct, total, percentage } = useQuizScore();
+  const { correct, percentage } = useQuizScore();
 
   // Shuffle options for each question (not the questions themselves)
   const questionsWithShuffledOptions = useMemo(
@@ -108,7 +108,9 @@ export default function QuizQuestions({ questions }: { questions: QuestionType[]
 
   return (
     <div id="questions" className="mx-auto max-w-7xl pb-8">
-      <div className="px-4 sm:px-6 py-4 md:py-8">
+      <div className="border-t border-gray-200 dark:border-white/10" />
+
+      <div className="px-4 sm:px-6 py-6 md:py-10">
         <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
           Quiz Questions
         </h2>
@@ -116,7 +118,7 @@ export default function QuizQuestions({ questions }: { questions: QuestionType[]
           Answer all questions below and test your knowledge.
         </p>
       </div>
-      <ol className="max-w-4xl pl-4 sm:pl-7 pr-4 sm:pr-6 space-y-6 sm:space-y-8">
+      <ol className="max-w-4xl pl-4 sm:pl-7 pr-4 sm:pr-6 space-y-5 sm:space-y-6">
         {questionsWithShuffledOptions.map((q, i) => (
           <li key={q.id}>
             <QuestionCard
@@ -125,10 +127,10 @@ export default function QuizQuestions({ questions }: { questions: QuestionType[]
               selected={answers[i]}
               onAnswer={setAnswer}
               isLastQuestion={i === totalQuestions - 1}
+              totalQuestions={totalQuestions}
               progress={progress}
               isComplete={isComplete}
               correct={correct}
-              total={total}
               percentage={percentage}
               reset={reset}
             />
@@ -145,10 +147,10 @@ function QuestionCard({
   selected,
   onAnswer,
   isLastQuestion,
+  totalQuestions,
   progress,
   isComplete,
   correct,
-  total,
   percentage,
   reset
 }: {
@@ -157,10 +159,10 @@ function QuestionCard({
   selected?: number;
   onAnswer?: (questionIndex: number, answerIndex: number) => void;
   isLastQuestion: boolean;
+  totalQuestions: number;
   progress: number;
   isComplete: boolean;
   correct: number;
-  total: number;
   percentage: number;
   reset: () => void;
 }) {
@@ -168,17 +170,14 @@ function QuestionCard({
   const isDisabled = isAnswered;
 
   return (
-    <div className="relative rounded-3xl sm:rounded-4xl border border-white/10 bg-white/50 dark:bg-slate-950/50 backdrop-blur-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.1)] p-5 sm:p-10">
-      <div className="absolute -left-3 -top-3 sm:-left-4 sm:-top-4 flex items-center justify-center">
-        <div className="relative">
-          <div className="absolute inset-0 bg-violet-500 blur-lg opacity-40" />
-          <div className="relative w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-2xl bg-linear-to-br from-violet-500 to-fuchsia-600 flex items-center justify-center text-white font-black text-sm sm:text-lg shadow-xl border border-white/20 transform -rotate-6">
-            {index + 1}
-          </div>
-        </div>
+    <div className="rounded-2xl border border-white/10 bg-white/50 dark:bg-slate-950/50 backdrop-blur-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.1)] p-5 sm:p-6">
+      <div className="flex items-center gap-2 mb-3">
+        <span className="text-xs font-semibold text-violet-600 dark:text-violet-400">
+          Question {index + 1} of {totalQuestions}
+        </span>
       </div>
 
-      <h2 className="text-lg sm:text-xl md:text-2xl font-extrabold text-slate-900 dark:text-white mb-4 sm:mb-8 pr-1 leading-snug sm:leading-tight tracking-tight wrap-break-word">
+      <h2 className="text-base sm:text-lg font-medium text-slate-900 dark:text-white mb-3 sm:mb-4 leading-snug wrap-break-word">
         {q.text}
       </h2>
 
@@ -208,7 +207,7 @@ function QuestionCard({
 
       {/* Progress bar after last question - transforms to results when complete */}
       {isLastQuestion && (
-        <div className="mt-8 pt-6 border-t border-gray-200 dark:border-white/10">
+        <div className="mt-6 pt-5 sm:pt-6 border-t border-gray-200 dark:border-white/10">
           {isComplete ? (
             // Results display when complete
             <div className="space-y-4">
@@ -228,7 +227,7 @@ function QuestionCard({
                   <div className="text-xs text-green-600 dark:text-green-400">Correct</div>
                 </div>
                 <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-3 border border-red-200 dark:border-red-700/30">
-                  <div className="text-2xl font-bold text-red-700 dark:text-red-300">{total - correct}</div>
+                  <div className="text-2xl font-bold text-red-700 dark:text-red-300">{totalQuestions - correct}</div>
                   <div className="text-xs text-red-600 dark:text-red-400">Incorrect</div>
                 </div>
                 <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
