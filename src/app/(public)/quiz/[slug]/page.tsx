@@ -7,6 +7,8 @@ import TelegramCTA from "@/components/common/telegram-cta";
 import { Sparkles } from "lucide-react";
 import QuizQuestions from "@/components/quiz-page/question-list";
 import ToolboxPromoCard from "@/components/common/toolbox-promo-card";
+import JsonLd from "@/components/common/JsonLd";
+import { generateQuizSchema, generateBreadcrumbSchema } from "@/lib/structured-data";
 import { api } from "@/lib/eden";
 
 type Props = {
@@ -23,11 +25,23 @@ export async function generateMetadata({ params, searchParams }: Props, parent: 
 
   if (!post) return {};
 
+  const baseUrl = process.env.BASE_URL ?? "https://quizzy.probir.dev";
+
   return {
     title: post.quizPageTitle + " | Quiz Zone",
     description: post.quizPageDescription,
     keywords: post.tags.map((tag) => tag.tag.name),
-    category: post?.category?.name
+    category: post?.category?.name,
+    alternates: {
+      canonical: `${baseUrl}/quiz/${slug}`
+    },
+    openGraph: {
+      title: post.quizPageTitle,
+      description: post.quizPageDescription,
+      url: `${baseUrl}/quiz/${slug}`,
+      siteName: "Quizzy",
+      type: "website"
+    }
   };
 }
 
@@ -58,7 +72,24 @@ async function QuizPage({ params }: Props) {
   if (!quiz) return notFound();
 
   return (
-    <section className="bg-gray-50 dark:bg-slate-950">
+    <>
+      <JsonLd data={generateQuizSchema({
+        name: quiz.title,
+        description: quiz.description || "",
+        numberOfQuestions: quiz._count.questions,
+        difficulty: quiz.difficulty,
+        categoryName: quiz.category?.name || "General",
+        slug
+      })} />
+      <JsonLd data={generateBreadcrumbSchema({
+        items: [
+          { name: "Home", href: "/" },
+          { name: "Categories", href: "/category" },
+          { name: quiz.category?.name || "General", href: `/category/${quiz.category?.slug}` },
+          { name: quiz.title, href: `/quiz/${slug}` }
+        ]
+      })} />
+      <section className="bg-gray-50 dark:bg-slate-950">
       <QuizPageHero
         quiz={quiz}
         breadcrumbs={[
@@ -96,6 +127,7 @@ async function QuizPage({ params }: Props) {
         </div>
       )}
     </section>
+    </>
   );
 }
 
