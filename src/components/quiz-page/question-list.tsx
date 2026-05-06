@@ -14,24 +14,32 @@ function shuffleOptions(question: QuestionType): QuestionType {
 
   return {
     ...question,
-    options: shuffled.map(o => o.text),
-    correctIndex: shuffled.findIndex(o => o.index === question.correctIndex)
+    options: shuffled.map((o) => o.text),
+    correctIndex: shuffled.findIndex((o) => o.index === question.correctIndex)
   };
 }
 
 // Button styles
 const styles = {
-  button: "w-full text-left px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border shadow-sm text-sm sm:text-base transition-all",
-  default: "bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-700 hover:shadow-md hover:bg-gray-50 dark:hover:bg-white/5",
+  button:
+    "w-full text-left px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border shadow-sm text-sm sm:text-base transition-all",
+  default:
+    "bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-700 hover:shadow-md hover:bg-gray-50 dark:hover:bg-white/5",
   correct: "bg-green-50 dark:bg-green-900/30 border-green-500 text-green-900 dark:text-green-100",
   wrong: "bg-red-50 dark:bg-red-900/30 border-red-500 text-red-900 dark:text-red-100",
   reveal: "bg-green-50/70 dark:bg-green-900/20 border-green-400 text-green-900/90 dark:text-green-200",
-  faded: "bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 opacity-60",
+  faded: "bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 opacity-60"
 };
 
 function AnswerIcon({ isPicked, isCorrect, answered }: { isPicked: boolean; isCorrect: boolean; answered: boolean }) {
-  if (!answered) return <Circle className={cn("h-4 w-4 shrink-0 transition-all", isPicked && "fill-gray-900 dark:fill-gray-100")} />;
-  if (isPicked) return isCorrect ? <CheckCircle2 className="h-4 w-4 shrink-0 text-green-600 dark:text-green-500" /> : <XCircle className="h-4 w-4 shrink-0 text-red-600 dark:text-red-500" />;
+  if (!answered)
+    return <Circle className={cn("h-4 w-4 shrink-0 transition-all", isPicked && "fill-gray-900 dark:fill-gray-100")} />;
+  if (isPicked)
+    return isCorrect ? (
+      <CheckCircle2 className="h-4 w-4 shrink-0 text-green-600 dark:text-green-500" />
+    ) : (
+      <XCircle className="h-4 w-4 shrink-0 text-red-600 dark:text-red-500" />
+    );
   if (isCorrect) return <Check className="h-4 w-4 shrink-0 text-green-500" />;
   return <Circle className="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-600" />;
 }
@@ -66,15 +74,19 @@ function AnswerButton({
       className={cn(
         styles.button,
         variant,
-        !answered && !disabled && "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-300 dark:focus-visible:ring-white/20",
-        (!answered && disabled) && "cursor-not-allowed"
+        !answered &&
+          !disabled &&
+          "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-300 dark:focus-visible:ring-white/20",
+        !answered && disabled && "cursor-not-allowed"
       )}
       onClick={onClick}
       disabled={disabled}
     >
       <span className="flex items-center gap-3">
         <AnswerIcon isPicked={isPicked} isCorrect={isCorrect} answered={answered} />
-        <span className="wrap-break-word">{text}</span>
+        <span suppressHydrationWarning className="wrap-break-word">
+          {text}
+        </span>
       </span>
     </button>
   );
@@ -88,10 +100,7 @@ export default function QuizQuestions({ questions }: { questions: QuestionType[]
   const { correct, percentage } = useQuizScore();
 
   // Shuffle options for each question (not the questions themselves)
-  const questionsWithShuffledOptions = useMemo(
-    () => questions.map(q => shuffleOptions(q)),
-    [questions]
-  );
+  const questionsWithShuffledOptions = useMemo(() => questions.map((q) => shuffleOptions(q)), [questions]);
 
   useEffect(() => {
     setCurrentQuiz(questionsWithShuffledOptions);
@@ -101,7 +110,7 @@ export default function QuizQuestions({ questions }: { questions: QuestionType[]
     return () => reset();
   }, [reset]);
 
-  const answeredCount = Object.values(answers).filter(a => a !== undefined && a !== null).length;
+  const answeredCount = Object.values(answers).filter((a) => a !== undefined && a !== null).length;
   const totalQuestions = questionsWithShuffledOptions.length;
   const progress = Math.round((answeredCount / totalQuestions) * 100);
   const isComplete = answeredCount === totalQuestions;
@@ -111,12 +120,8 @@ export default function QuizQuestions({ questions }: { questions: QuestionType[]
       <div className="border-t border-gray-200 dark:border-white/10" />
 
       <div className="px-4 sm:px-6 py-6 md:py-10">
-        <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
-          Quiz Questions
-        </h2>
-        <p className="text-gray-600 dark:text-gray-300">
-          Answer all questions below and test your knowledge.
-        </p>
+        <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">Quiz Questions</h2>
+        <p className="text-gray-600 dark:text-gray-300">Answer all questions below and test your knowledge.</p>
       </div>
       <ol className="max-w-4xl pl-4 sm:pl-7 pr-4 sm:pr-6 space-y-5 sm:space-y-6">
         {questionsWithShuffledOptions.map((q, i) => (
@@ -213,9 +218,7 @@ function QuestionCard({
             <div className="space-y-4">
               <div className="text-center">
                 <Trophy className="w-8 h-8 text-green-500 mx-auto mb-2" />
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
-                  Quiz Complete!
-                </h3>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">Quiz Complete!</h3>
                 <p className={cn("text-sm font-medium", getQuizScoreColor(percentage))}>
                   {getQuizScoreMessage(percentage)}
                 </p>
@@ -250,13 +253,9 @@ function QuestionCard({
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <Trophy className="w-5 h-5 text-violet-500" />
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Your Progress
-                  </span>
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Your Progress</span>
                 </div>
-                <span className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {progress}%
-                </span>
+                <span className="text-2xl font-bold text-gray-900 dark:text-white">{progress}%</span>
               </div>
               <div className="relative w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                 <div

@@ -26,7 +26,7 @@ export default function QuizHero({ quiz, breadcrumbs }: { quiz: QuizPageType; br
   const textColor = difficultyTextColors[quiz.difficulty as QuizDifficulty] || "text-violet-400";
 
   return (
-    <div className="relative overflow-hidden bg-gray-50 dark:bg-slate-950 pt-20 md:pt-24 pb-12 md:pb-16">
+    <div className="relative overflow-hidden bg-gray-50 dark:bg-slate-950 pt-24 md:pt-28 pb-12 md:pb-16">
       {/* Background blobs */}
       <div className="absolute inset-0 overflow-hidden">
         <div
