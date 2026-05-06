@@ -42,6 +42,8 @@ function SubCategoryFilters({ subCategories }: Props) {
     const params = new URLSearchParams(searchParams.toString());
     if (slug) params.set("subcategory", slug);
     else params.delete("subcategory");
+    // Reset page to 1 when changing subcategory
+    params.delete("page");
     return `${pathname}?${params.toString()}`;
   };
 
@@ -76,10 +78,10 @@ function SubCategoryFilters({ subCategories }: Props) {
               "bg-white dark:bg-gray-800",
               "border border-gray-200/70 dark:border-gray-700 shadow-sm",
               "transition-all duration-300 ease-out",
-              "hover:bg-gradient-to-r hover:from-violet-500 hover:to-fuchsia-600 hover:text-white hover:shadow-lg",
+              "hover:bg-linear-to-r hover:from-violet-500 hover:to-fuchsia-600 hover:text-white hover:shadow-lg",
               "active:scale-95 focus:ring-2 focus:ring-violet-500 focus:outline-none",
               !currentSub &&
-                "bg-gradient-to-r from-violet-500 to-fuchsia-600 text-white shadow-lg"
+                "bg-linear-to-r from-violet-500 to-fuchsia-600 text-white shadow-lg"
             )}
           >
             All

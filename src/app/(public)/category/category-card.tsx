@@ -47,7 +47,7 @@ function CategoryCard({ category }: CategoryCardProps) {
               <Link
                 key={sub.id}
                 prefetch
-                href={`/category/${category.slug}?sub=${sub.slug}`}
+                href={`/category/${category.slug}?subcategory=${sub.slug}`}
                 className="px-3 py-1.5 text-sm rounded-full border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-indigo-950 hover:text-fuchsia-600 dark:hover:text-fuchsia-400 hover:border-indigo-200 dark:hover:border-indigo-800 transition"
               >
                 {sub.name}
