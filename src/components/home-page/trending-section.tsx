@@ -1,7 +1,7 @@
 "use client";
 
 import { TrendingUp, ArrowRight } from "lucide-react";
-import { QuizCard } from "@/queries/home-page";
+import { QuizCard } from "@/modules/quiz/quiz.service";
 import Link from "next/link";
 import { Card } from "../ui/card";
 import { getCardGradient } from "@/lib/visual-utils";

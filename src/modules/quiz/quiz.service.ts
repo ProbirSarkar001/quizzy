@@ -4,6 +4,15 @@ import { QuizWhereInput } from "@/generated/prisma/models";
 export type HomePageData = Awaited<ReturnType<typeof QuizService.getHomePageData>>;
 export type QuizCard = HomePageData[number]["quizzes"][number];
 
+// quiz page type without null
+export type QuizPageType = NonNullable<Awaited<ReturnType<typeof QuizService.getQuiz>>>;
+
+// question type helper
+export type QuestionType = QuizPageType["questions"][number];
+
+export type CategoriesWithStatsData = Awaited<ReturnType<typeof QuizService.getCategoriesWithStats>>;
+export type CategoryWithStats = CategoriesWithStatsData["items"][number];
+
 export type GetQuizzesByCategoryOpts = {
   categorySlug: string;
   page?: number;

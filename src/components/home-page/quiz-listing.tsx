@@ -1,4 +1,4 @@
-import { QuizCard as QuizCardType } from "@/queries/home-page";
+import { QuizCard as QuizCardType } from "@/modules/quiz/quiz.service";
 import { QuizCard } from "./quiz-card";
 
 export default function QuizListing({ quizzes }: { quizzes: QuizCardType[] }) {

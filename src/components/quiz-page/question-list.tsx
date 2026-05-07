@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo } from "react";
 import { Info, Circle, CheckCircle2, XCircle, Check, Trophy, RotateCcw } from "lucide-react";
-import { QuestionType } from "@/queries/home-page";
+import { QuestionType } from "@/modules/quiz/quiz.service";
 import { useQuizStore, useQuizScore, getQuizScoreMessage, getQuizScoreColor } from "@/stores/quiz-store";
 import { cn } from "@/lib/utils";
 import { shuffle } from "es-toolkit/array";

@@ -1,5 +1,5 @@
 import { Sparkles, Target, Layers } from "lucide-react";
-import { QuizPageType } from "@/queries/home-page";
+import { QuizPageType } from "@/modules/quiz/quiz.service";
 import { QuizDifficulty } from "@/generated/prisma/enums";
 import { cn } from "@/lib/utils";
 

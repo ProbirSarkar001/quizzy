@@ -1,5 +1,5 @@
 "use client";
-import { QuestionType } from "@/queries/home-page";
+import { QuestionType } from "@/modules/quiz/quiz.service";
 import { useState } from "react";
 
 function QuestionCard({ q, index }: { q: QuestionType; index: number }) {

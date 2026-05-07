@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { QuestionType } from "@/queries/home-page";
+import { QuestionType } from "@/modules/quiz/quiz.service";
 import { calculateQuizScore, getQuizScoreMessage, getQuizScoreColor } from "@/lib/quiz-utils";
 
 interface QuizState {
