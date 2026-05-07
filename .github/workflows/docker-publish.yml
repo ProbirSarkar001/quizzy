@@ -29,5 +29,4 @@ jobs:
           platforms: linux/arm64
           tags: hyd.ocir.io/${{ secrets.TENANCY_NAMESPACE }}/${{ github.repository }}:latest
           build-args: |
-            NODE_ENV=production
             BASE_URL=https://quizzy.probir.dev
