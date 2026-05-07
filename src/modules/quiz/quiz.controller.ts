@@ -5,6 +5,7 @@ export const QuizController = new Elysia({ prefix: "/quiz" })
   .get("/stats", () => QuizService.getHomePageStats())
   .get("/home-data", () => QuizService.getHomePageData())
   .get("/categories", () => QuizService.getCategories())
+  .get("/categories-stats", () => QuizService.getCategoriesStats())
   .get("/by-category", ({ query }) => {
     return QuizService.getQuizzesByCategory({
       categorySlug: query.categorySlug,

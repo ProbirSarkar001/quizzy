@@ -1,10 +1,10 @@
 import NextTopLoader from "nextjs-toploader";
-
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import { GoogleTagManager } from "@next/third-parties/google";
 import JsonLd from "@/components/common/JsonLd";
 import { generateWebSiteSchema } from "@/lib/structured-data";
+import { Providers } from "./providers";
 
 // @ts-ignore
 import "./globals.css";
@@ -40,6 +40,7 @@ export default function RootLayout({
         <JsonLd data={generateWebSiteSchema()} />
       </head>
       <GoogleTagManager gtmId="G-KMP0FXVWFL" />
+      <Providers>
       <body suppressHydrationWarning className={` ${poppins.className} flex min-h-full flex-col antialiased`}>
         <a
           href="#main-content"
@@ -52,6 +53,7 @@ export default function RootLayout({
           {children}
         </div>
       </body>
+      </Providers>
     </html>
   );
 }

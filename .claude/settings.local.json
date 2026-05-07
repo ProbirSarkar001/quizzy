@@ -23,7 +23,8 @@
       "Bash(bun run lint)",
       "Bash(npx tsc:*)",
       "Bash(bunx eslint:*)",
-      "Bash(bun run *)"
+      "Bash(bun run *)",
+      "Bash(curl -s \"http://localhost:3000/api/quiz/categories-stats\")"
     ],
     "deny": [],
     "ask": []

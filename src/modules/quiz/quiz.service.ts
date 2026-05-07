@@ -136,6 +136,18 @@ export abstract class QuizService {
     };
   }
 
+  static async getCategoriesStats() {
+    const [totalCategories, totalSubcategories] = await Promise.all([
+      prisma.category.count(),
+      prisma.subCategory.count()
+    ]);
+
+    return {
+      totalCategories,
+      totalSubcategories
+    };
+  }
+
   static async getCategoriesWithStats({ page = 1, perPage = 12 } = {}) {
     const actualPage = page ?? 1;
     const actualPerPage = perPage ?? 12;

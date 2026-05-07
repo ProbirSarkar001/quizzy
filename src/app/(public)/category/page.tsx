@@ -1,18 +1,7 @@
 import Link from "next/link";
 import { Sparkles, ChevronLeft } from "lucide-react";
 import type { Metadata } from "next";
-import { connection } from "next/server";
-import CategoryCard from "./category-card";
-import { calculatePaginationWindow } from "@/lib/pagination-utils";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious
-} from "@/components/ui/pagination";
+import { CategoryList } from "./category-list";
 import { api } from "@/lib/eden";
 
 export const metadata: Metadata = {
@@ -21,37 +10,12 @@ export const metadata: Metadata = {
     "Explore all quiz categories and test your knowledge across various topics. From science to pop culture, find quizzes that match your interests and challenge yourself."
 };
 
-const CATEGORIES_PER_PAGE = 12;
-const PAGINATION_WINDOW_SIZE = 5;
+export default async function CategoriesPage() {
+  const response = await api.quiz["categories-stats"].get();
+  console.log(response);
 
-export default async function CategoriesPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
-  const { page = "1" } = await searchParams;
-  const currentPage = Math.max(1, parseInt(page));
-
-  // Fetch paginated categories and stats from API
-  const { data: response } = await api.quiz["categories-with-stats"].get({
-    query: {
-      page: currentPage,
-      perPage: CATEGORIES_PER_PAGE
-    },
-    fetch: {
-      cache: "force-cache",
-      next: {
-        revalidate: 60 * 60
-      }
-    }
-  });
-
-  const categories = response?.items ?? [];
-  const meta = response?.meta ?? {
-    totalCategories: 0,
-    totalSubcategories: 0,
-    totalPages: 1,
-    currentPage: 1,
-    perPage: CATEGORIES_PER_PAGE
-  };
-
-  const { totalCategories, totalSubcategories, totalPages, currentPage: validPage } = meta;
+  const totalCategories = response.data?.totalCategories ?? 0;
+  const totalSubcategories = response.data?.totalSubcategories ?? 0;
 
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-950">
@@ -103,70 +67,7 @@ export default async function CategoriesPage({ searchParams }: { searchParams: P
         </div>
       </section>
 
-      {/* Category List Section */}
-      <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-14">
-        <div className="max-w-4xl">
-          {categories.length > 0 ? (
-            <>
-              <div className="grid gap-6">
-                {categories.map((cat) => (
-                  <CategoryCard key={cat.id} category={cat} />
-                ))}
-              </div>
-
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="mt-12 flex justify-center">
-                  <Pagination>
-                    <PaginationContent>
-                      {validPage > 1 && (
-                        <PaginationItem>
-                          <PaginationPrevious href={`/category?page=${validPage - 1}`} />
-                        </PaginationItem>
-                      )}
-
-                      {calculatePaginationWindow(validPage, totalPages, PAGINATION_WINDOW_SIZE).pages.map((pageNum) => {
-                        const isActive = pageNum === validPage;
-                        return (
-                          <PaginationItem key={pageNum}>
-                            <PaginationLink href={`/category?page=${pageNum}`} isActive={isActive}>
-                              {pageNum}
-                            </PaginationLink>
-                          </PaginationItem>
-                        );
-                      })}
-
-                      {(() => {
-                        const { showEndEllipsis } = calculatePaginationWindow(
-                          validPage,
-                          totalPages,
-                          PAGINATION_WINDOW_SIZE
-                        );
-                        return showEndEllipsis ? (
-                          <PaginationItem>
-                            <PaginationEllipsis />
-                          </PaginationItem>
-                        ) : null;
-                      })()}
-
-                      {validPage < totalPages && (
-                        <PaginationItem>
-                          <PaginationNext href={`/category?page=${validPage + 1}`} />
-                        </PaginationItem>
-                      )}
-                    </PaginationContent>
-                  </Pagination>
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="text-center py-20">
-              <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">No categories found</h3>
-              <p className="text-gray-500 dark:text-gray-400">Check back later for new content</p>
-            </div>
-          )}
-        </div>
-      </section>
+      <CategoryList />
     </main>
   );
 }
