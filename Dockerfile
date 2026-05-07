@@ -1,4 +1,11 @@
 # ============================================
+# Global ARGs — declared before all FROM statements
+# ============================================
+ARG BASE_URL
+ARG NODE_ENV=production
+
+
+# ============================================
 # Stage 1: Dependencies Installation Stage
 # ============================================
 
@@ -25,10 +32,6 @@ FROM oven/bun:1 AS builder
 
 # Set working directory
 WORKDIR /app
-
-
-ARG BASE_URL
-ENV BASE_URL=$BASE_URL
 
 # Copy project dependencies from dependencies stage
 COPY --from=dependencies /app/node_modules ./node_modules
@@ -61,7 +64,6 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
-ARG BASE_URL
 ENV BASE_URL=$BASE_URL
 
 
