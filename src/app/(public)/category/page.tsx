@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Sparkles, ChevronLeft } from "lucide-react";
 import type { Metadata } from "next";
 import { CategoryList } from "./category-list";
-import { api } from "@/lib/eden";
+import { QuizService } from "@/modules/quiz/quiz.service";
 
 export const metadata: Metadata = {
   title: "All Quiz Categories - Quizzy",
@@ -11,11 +11,10 @@ export const metadata: Metadata = {
 };
 
 export default async function CategoriesPage() {
-  const response = await api.quiz["categories-stats"].get();
-  console.log(response);
+  const stats = await QuizService.getCategoriesStats();
 
-  const totalCategories = response.data?.totalCategories ?? 0;
-  const totalSubcategories = response.data?.totalSubcategories ?? 0;
+  const totalCategories = stats.totalCategories ?? 0;
+  const totalSubcategories = stats.totalSubcategories ?? 0;
 
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-950">

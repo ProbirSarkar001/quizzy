@@ -8,12 +8,14 @@ import { memo, useState, useMemo } from "react";
 
 type Props = {
   subCategories: { name: string; slug: string; count: number }[];
+  selectedSlug?: string | null;
+  onSelect?: (slug: string | null) => void;
 };
 
-function SubCategoryFilters({ subCategories }: Props) {
+function SubCategoryFilters({ subCategories, selectedSlug, onSelect }: Props) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  const currentSub = searchParams.get("subcategory");
+  const currentSub = onSelect ? selectedSlug : searchParams.get("subcategory");
 
   // Add search for subcategories if there are many
   const [searchTerm, setSearchTerm] = useState("");
@@ -66,11 +68,9 @@ function SubCategoryFilters({ subCategories }: Props) {
         className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide"
       >
         {/* All option */}
-        <Link href={buildHref()} scroll={false}>
-          <Badge
-            role="tab"
-            aria-selected={!currentSub}
-            tabIndex={0}
+        {onSelect ? (
+          <button
+            onClick={() => onSelect(null)}
             className={cn(
               "px-4 py-2 rounded-full whitespace-nowrap cursor-pointer",
               "inline-flex items-center gap-2",
@@ -83,10 +83,34 @@ function SubCategoryFilters({ subCategories }: Props) {
               !currentSub &&
                 "bg-linear-to-r from-violet-500 to-fuchsia-600 text-white shadow-lg"
             )}
+            role="tab"
+            aria-selected={!currentSub}
           >
             All
-          </Badge>
-        </Link>
+          </button>
+        ) : (
+          <Link href={buildHref()} scroll={false}>
+            <Badge
+              role="tab"
+              aria-selected={!currentSub}
+              tabIndex={0}
+              className={cn(
+                "px-4 py-2 rounded-full whitespace-nowrap cursor-pointer",
+                "inline-flex items-center gap-2",
+                "text-gray-700 dark:text-gray-300",
+                "bg-white dark:bg-gray-800",
+                "border border-gray-200/70 dark:border-gray-700 shadow-sm",
+                "transition-all duration-300 ease-out",
+                "hover:bg-linear-to-r hover:from-violet-500 hover:to-fuchsia-600 hover:text-white hover:shadow-lg",
+                "active:scale-95 focus:ring-2 focus:ring-violet-500 focus:outline-none",
+                !currentSub &&
+                  "bg-linear-to-r from-violet-500 to-fuchsia-600 text-white shadow-lg"
+              )}
+            >
+              All
+            </Badge>
+          </Link>
+        )}
 
         {/* Subcategories */}
         {orderedSubs.map((cat) => {
@@ -95,27 +119,45 @@ function SubCategoryFilters({ subCategories }: Props) {
             return null;
           }
 
-          return (
+          const content = (
+            <>
+              <span>{cat.name}</span>
+              <span className="text-xs opacity-70">({cat.count})</span>
+            </>
+          );
+
+          const badgeClassName = cn(
+            "px-4 py-2 rounded-full whitespace-nowrap cursor-pointer",
+            "inline-flex items-center gap-2",
+            "text-gray-700 dark:text-gray-300",
+            "bg-white dark:bg-gray-800",
+            "border border-gray-200/70 dark:border-gray-700 shadow-sm",
+            "transition-all duration-300 ease-out",
+            "hover:bg-gradient-to-r hover:from-violet-500 hover:to-fuchsia-600 hover:text-white hover:shadow-lg",
+            "active:scale-95 focus:ring-2 focus:ring-violet-500 focus:outline-none",
+            currentSub === cat.slug &&
+              "bg-gradient-to-r from-violet-500 to-fuchsia-600 text-white shadow-lg"
+          );
+
+          return onSelect ? (
+            <button
+              key={cat.slug}
+              onClick={() => onSelect(cat.slug)}
+              className={badgeClassName}
+              role="tab"
+              aria-selected={currentSub === cat.slug}
+            >
+              {content}
+            </button>
+          ) : (
             <Link key={cat.slug} href={buildHref(cat.slug)} scroll={false}>
               <Badge
                 role="tab"
                 aria-selected={currentSub === cat.slug}
                 tabIndex={0}
-                className={cn(
-                  "px-4 py-2 rounded-full whitespace-nowrap cursor-pointer",
-                  "inline-flex items-center gap-2",
-                  "text-gray-700 dark:text-gray-300",
-                  "bg-white dark:bg-gray-800",
-                  "border border-gray-200/70 dark:border-gray-700 shadow-sm",
-                  "transition-all duration-300 ease-out",
-                  "hover:bg-gradient-to-r hover:from-violet-500 hover:to-fuchsia-600 hover:text-white hover:shadow-lg",
-                  "active:scale-95 focus:ring-2 focus:ring-violet-500 focus:outline-none",
-                  currentSub === cat.slug &&
-                    "bg-gradient-to-r from-violet-500 to-fuchsia-600 text-white shadow-lg"
-                )}
+                className={badgeClassName}
               >
-                <span>{cat.name}</span>
-                <span className="text-xs opacity-70">({cat.count})</span>
+                {content}
               </Badge>
             </Link>
           );

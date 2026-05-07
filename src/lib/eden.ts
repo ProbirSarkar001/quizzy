@@ -1,7 +1,7 @@
 import { treaty } from "@elysiajs/eden";
 import { app } from "../app/api/[[...slugs]]/route";
 
-const publicUrl = process.env.BASE_URL || "http://localhost:3000";
+const publicUrl = process.env.NEXT_PUBLIC_URL!;
 // .api to enter /api prefix
-// Use direct app treaty on server, URL-based treaty on client
+// Use for client components
 export const api = treaty<typeof app>(publicUrl).api;
