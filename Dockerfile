@@ -25,7 +25,8 @@ FROM oven/bun:1 AS builder
 
 # Set working directory
 WORKDIR /app
-
+ARG BASE_URL
+ENV NEXT_PUBLIC_BASE_URL=$BASE_URL
 # Copy project dependencies from dependencies stage
 COPY --from=dependencies /app/node_modules ./node_modules
 
@@ -54,11 +55,11 @@ FROM oven/bun:1 AS runner
 WORKDIR /app
 
 ARG BASE_URL
+ENV NEXT_PUBLIC_BASE_URL=$BASE_URL
 # Set production environment variables
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
-ENV NEXT_PUBLIC_BASE_URL=$BASE_URL
 
 
 # Next.js collects completely anonymous telemetry data about general usage.
