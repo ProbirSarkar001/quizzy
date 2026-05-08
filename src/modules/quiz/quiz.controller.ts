@@ -5,6 +5,13 @@ export const QuizController = new Elysia({ prefix: "/quiz" })
   .get("/stats", () => QuizService.getHomePageStats())
   .get("/home-data", () => QuizService.getHomePageData())
   .get("/categories", () => QuizService.getCategories())
+  .get("/category-info", ({ query }) => {
+    return QuizService.getCategoryInfo(query.slug);
+  }, {
+    query: t.Object({
+      slug: t.String()
+    })
+  })
   .get("/by-category", ({ query }) => {
     return QuizService.getQuizzesByCategory({
       categorySlug: query.categorySlug,

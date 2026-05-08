@@ -72,6 +72,33 @@ export abstract class QuizService {
     });
   }
 
+  static async getCategoryInfo(slug: string) {
+    return prisma.category.findUnique({
+      where: { slug },
+      include: {
+        subCategories: {
+          include: {
+            _count: {
+              select: {
+                quizzes: true
+              }
+            }
+          },
+          orderBy: {
+            quizzes: {
+              _count: "desc"
+            }
+          }
+        },
+        _count: {
+          select: {
+            quizzes: true
+          }
+        }
+      }
+    });
+  }
+
   static async getQuizzesByCategory({
     categorySlug,
     page = 1,

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { QuizCard } from "@/components/home-page/quiz-card";
 import SubCategoryFilters from "@/components/category/sub-category-filter";
 import { calculatePaginationWindow } from "@/lib/pagination-utils";
@@ -19,19 +19,16 @@ const PAGINATION_WINDOW_SIZE = 5;
 
 type QuizListProps = {
   categorySlug: string;
-  initialPage?: number;
-  initialSubcategory?: string | null;
 };
 
-export function QuizList({ categorySlug, initialPage = 1, initialSubcategory = null }: QuizListProps) {
+export function QuizList({ categorySlug }: QuizListProps) {
   const searchParams = useSearchParams();
-  const router = useRouter();
 
   const pageParam = searchParams.get("page");
   const subcategoryParam = searchParams.get("subcategory");
 
-  const [currentPage, setCurrentPage] = useState(Math.max(1, Number(pageParam) || initialPage));
-  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(subcategoryParam || initialSubcategory);
+  const [currentPage, setCurrentPage] = useState(Math.max(1, Number(pageParam) || 1));
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(subcategoryParam);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["quizzes-by-category", categorySlug, currentPage, selectedSubcategory],

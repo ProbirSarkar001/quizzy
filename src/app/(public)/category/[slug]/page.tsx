@@ -3,65 +3,58 @@ import { QuizList } from "./quiz-list";
 import JsonLd from "@/components/common/JsonLd";
 import { generateCategorySchema, generateBreadcrumbSchema } from "@/lib/structured-data";
 import { notFound } from "next/navigation";
-import { QuizService } from "@/modules/quiz/quiz.service";
+import { api } from "@/lib/eden";
+import { BASE_URL } from "@/lib/constants";
 import type { Metadata } from "next";
 
 type Props = {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ [key: string]: string | undefined }>;
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
 
-  const categoryData = await QuizService.getQuizzesByCategory({
-    categorySlug: slug,
-    page: 1,
-    perPage: 1
+  const categoryInfo = await api.quiz["category-info"].get({
+    query: { slug }
   });
 
-  if (!categoryData?.category) {
+  if (!categoryInfo.data) {
     notFound();
   }
 
-  const categoryName = categoryData.category?.name;
-  const baseUrl = process.env.BASE_URL ?? "https://quizzy.probir.dev";
+  const categoryName = categoryInfo.data?.name;
 
   return {
     title: `${categoryName} Quizzes - Quizzy`,
     description: `Explore ${categoryName.toLowerCase()} quizzes on Quizzy. Test your knowledge with our collection of expertly crafted questions.`,
     alternates: {
-      canonical: `${baseUrl}/category/${slug}`
+      canonical: `${BASE_URL}/category/${slug}`
     },
     openGraph: {
       title: `${categoryName} Quizzes - Quizzy`,
       description: `Explore ${categoryName.toLowerCase()} quizzes on Quizzy. Test your knowledge with our collection of expertly crafted questions.`,
-      url: `${baseUrl}/category/${slug}`,
+      url: `${BASE_URL}/category/${slug}`,
       siteName: "Quizzy",
       type: "website"
     }
   };
 }
 
-export default async function CategoryPage({ params, searchParams }: Props) {
+export default async function CategoryPage({ params }: Props) {
   const { slug } = await params;
-  const { page, subcategory } = await searchParams;
 
-  // Fetch category data for SSR hero section
-  const categoryData = await QuizService.getQuizzesByCategory({
-    categorySlug: slug,
-    page: Number(page) || 1,
-    perPage: 1
+  const categoryInfo = await api.quiz["category-info"].get({
+    query: { slug }
   });
 
-  if (!categoryData?.category) {
+  if (!categoryInfo.data) {
     return notFound();
   }
 
-  const categoryName = categoryData.category?.name || "";
-  const categorySlug = categoryData.category?.slug || "";
-  const categoryQuizCount = categoryData.category?._count?.quizzes || 0;
-  const subCategoryCount = categoryData.category?.subCategories?.length || 0;
+  const categoryName = categoryInfo.data?.name || "";
+  const categorySlug = categoryInfo.data?.slug || "";
+  const categoryQuizCount = categoryInfo.data?._count?.quizzes || 0;
+  const subCategoryCount = categoryInfo.data?.subCategories?.length || 0;
 
   return (
     <>
@@ -86,11 +79,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
             subCategryCount: subCategoryCount
           }}
         />
-        <QuizList
-          categorySlug={slug}
-          initialPage={Number(page) || undefined}
-          initialSubcategory={subcategory ?? null}
-        />
+        <QuizList categorySlug={slug} />
       </main>
     </>
   );
