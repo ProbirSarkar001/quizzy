@@ -1,23 +1,8 @@
 "use client";
-
-import { useEffect, useMemo } from "react";
 import { Info, Circle, CheckCircle2, XCircle, Check, Trophy, RotateCcw } from "lucide-react";
 import { QuestionType } from "@/modules/quiz/quiz.service";
 import { useQuizStore, useQuizScore, getQuizScoreMessage, getQuizScoreColor } from "@/stores/quiz-store";
 import { cn } from "@/lib/utils";
-import { shuffle } from "es-toolkit/array";
-
-// Shuffle answer options and update correctIndex to match new positions
-function shuffleOptions(question: QuestionType): QuestionType {
-  const optionsWithIndex = question.options.map((text, index) => ({ text, index }));
-  const shuffled = shuffle(optionsWithIndex);
-
-  return {
-    ...question,
-    options: shuffled.map((o) => o.text),
-    correctIndex: shuffled.findIndex((o) => o.index === question.correctIndex)
-  };
-}
 
 // Button styles
 const styles = {
@@ -75,8 +60,8 @@ function AnswerButton({
         styles.button,
         variant,
         !answered &&
-          !disabled &&
-          "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-300 dark:focus-visible:ring-white/20",
+        !disabled &&
+        "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-300 dark:focus-visible:ring-white/20",
         !answered && disabled && "cursor-not-allowed"
       )}
       onClick={onClick}
@@ -93,7 +78,6 @@ function AnswerButton({
 }
 
 export default function QuizQuestions({ questions }: { questions: QuestionType[] }) {
-  const setCurrentQuiz = useQuizStore((state) => state.setCurrentQuiz);
   const answers = useQuizStore((state) => state.answers);
   const setAnswer = useQuizStore((state) => state.setAnswer);
   const reset = useQuizStore((state) => state.reset);
@@ -106,7 +90,7 @@ export default function QuizQuestions({ questions }: { questions: QuestionType[]
 
   return (
     <div id="questions" className="mx-auto max-w-7xl pb-8">
- 
+
 
       <div className="px-4 sm:px-6 py-6 md:py-10">
         <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">Quiz Questions</h2>
@@ -179,7 +163,7 @@ function QuestionCard({
         <legend className="sr-only">Question {index + 1}</legend>
         {q.options.map((opt, i) => (
           <AnswerButton
-            key={i}
+            key={`${q.id}-${opt}`}
             text={opt}
             isPicked={selected === i}
             isCorrect={i === q.correctIndex}
