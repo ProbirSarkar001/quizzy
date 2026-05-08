@@ -100,7 +100,7 @@ export default function QuizQuestions({ questions }: { questions: QuestionType[]
   const { correct, percentage } = useQuizScore();
 
   const answeredCount = Object.values(answers).filter((a) => a !== undefined && a !== null).length;
-  const totalQuestions = questionsWithShuffledOptions.length;
+  const totalQuestions = questions.length;
   const progress = Math.round((answeredCount / totalQuestions) * 100);
   const isComplete = answeredCount === totalQuestions;
 
@@ -113,7 +113,7 @@ export default function QuizQuestions({ questions }: { questions: QuestionType[]
         <p className="text-gray-600 dark:text-gray-300">Answer all questions below and test your knowledge.</p>
       </div>
       <ol className="max-w-4xl pl-4 sm:pl-7 pr-4 sm:pr-6 space-y-5 sm:space-y-6">
-        {questionsWithShuffledOptions.map((q, i) => (
+        {questions.map((q, i) => (
           <li key={q.id}>
             <QuestionCard
               q={q}
