@@ -84,7 +84,7 @@ function AnswerButton({
     >
       <span className="flex items-center gap-3">
         <AnswerIcon isPicked={isPicked} isCorrect={isCorrect} answered={answered} />
-        <span suppressHydrationWarning className="wrap-break-word">
+        <span className="wrap-break-word">
           {text}
         </span>
       </span>
@@ -98,17 +98,6 @@ export default function QuizQuestions({ questions }: { questions: QuestionType[]
   const setAnswer = useQuizStore((state) => state.setAnswer);
   const reset = useQuizStore((state) => state.reset);
   const { correct, percentage } = useQuizScore();
-
-  // Shuffle options for each question (not the questions themselves)
-  const questionsWithShuffledOptions = useMemo(() => questions.map((q) => shuffleOptions(q)), [questions]);
-
-  useEffect(() => {
-    setCurrentQuiz(questionsWithShuffledOptions);
-  }, [questionsWithShuffledOptions]);
-
-  useEffect(() => {
-    return () => reset();
-  }, [reset]);
 
   const answeredCount = Object.values(answers).filter((a) => a !== undefined && a !== null).length;
   const totalQuestions = questionsWithShuffledOptions.length;
