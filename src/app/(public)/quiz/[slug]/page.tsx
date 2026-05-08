@@ -5,7 +5,15 @@ import { QuizCard } from "@/components/home-page/quiz-card";
 import ShareButtons from "@/components/common/ShareButtons";
 import TelegramCTA from "@/components/common/telegram-cta";
 import { Sparkles } from "lucide-react";
-import QuizQuestions from "@/components/quiz-page/question-list";
+// import QuizQuestions from "@/components/quiz-page/question-list";
+import dynamic from "next/dynamic";
+
+const QuizQuestions = dynamic(
+  () => import("@/components/quiz-page/question-list"),
+  {
+    ssr: false
+  }
+);
 import ToolboxPromoCard from "@/components/common/toolbox-promo-card";
 import JsonLd from "@/components/common/JsonLd";
 import { generateQuizSchema, generateBreadcrumbSchema } from "@/lib/structured-data";
