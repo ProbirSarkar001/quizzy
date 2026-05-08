@@ -104,7 +104,7 @@ export default function QuizQuestions({ questions }: { questions: QuestionType[]
 
   useEffect(() => {
     setCurrentQuiz(questionsWithShuffledOptions);
-  }, [questionsWithShuffledOptions, setCurrentQuiz]);
+  }, [questionsWithShuffledOptions]);
 
   useEffect(() => {
     return () => reset();
